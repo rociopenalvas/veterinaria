@@ -3,7 +3,7 @@ from menu import Menu
 
 def main():
     # Crear la clínica que controla los turnos
-    clinica = ClinicaVeterinaria("Veterinariaaa")
+    clinica = ClinicaVeterinaria("VVeterinariaaa")
 
     # Crear el menú
     menu = Menu(clinica)
