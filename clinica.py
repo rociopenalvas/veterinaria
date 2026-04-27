@@ -270,24 +270,24 @@ class ClinicaVeterinaria:
 
         turno.modificar_fecha(nueva_fecha)
 
-    def turnos_por_veterinario(self, veterinario: Veterinario):
+    def turnos_por_veterinario(self, matricula_veterinario: str):
         resultados = []
         for t in self._turnos:
-            if t.get_veterinario() == veterinario and t.get_estado() == "Activo":
+            if t.get_veterinario() == self._buscar_veterinario_por_matricula(matricula_veterinario) and t.get_estado() == "Activo":
                 resultados.append(t)
         return resultados
             
-    def turnos_por_mascota(self, mascota: Mascota):
+    def turnos_por_mascota(self, nombre_mascota: str, dni_dueno: int):
         resultados = []
         for t in self._turnos:
-            if t.get_mascota() == mascota and t.get_estado() == "Activo":
+            if t.get_mascota() == self._buscar_mascota(nombre_mascota, dni_dueno) and t.get_estado() == "Activo":
                 resultados.append(t)
         return resultados
     
-    def turnos_por_dueno(self, dueno: Dueno):
+    def turnos_por_dueno(self, dni_dueno: int):
         resultados = []
         for t in self._turnos:
-            if t.get_mascota().get_dueno() == dueno and t.get_estado() == "Activo":
+            if t.get_mascota().get_dueno() == self._buscar_dueno_por_dni(dni_dueno) and t.get_estado() == "Activo":
                 resultados.append(t)
         return resultados
     
@@ -316,7 +316,7 @@ class ClinicaVeterinaria:
         # Verificar si tiene mascotas asociadas
         for mascota in self._mascotas:
             if mascota.get_dueno() == dueno:
-                raise ValueError("El dueño porque tiene mascotas asociadas.")
+                raise ValueError("No se puede eliminar dueño porque tiene mascotas asociadas.")
 
         self._duenos.remove(dueno)
 

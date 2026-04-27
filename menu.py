@@ -6,11 +6,6 @@ class Menu:
         self._clinica = clinica
 
     def ejecutar(self):
-        print("------------------------------")
-        print(" Sistema de Turnos ")
-        print("------------------------------")
-
-    def ejecutar(self):
         while True:
             print("\n===== SISTEMA VETERINARIA =====")
             print("1. Dueños")
