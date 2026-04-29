@@ -177,6 +177,6 @@ class TestClinica(unittest.TestCase):
 
         mascota = self.clinica._mascotas[0]
         self.assertEqual(10, mascota._edad)
-        
+
 if __name__ == "__main__":
     unittest.main()
