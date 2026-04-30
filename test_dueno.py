@@ -1,6 +1,7 @@
 import unittest
 from clinica import ClinicaVeterinaria
 
+
 class TestDueno(unittest.TestCase):
 
     def setUp(self):

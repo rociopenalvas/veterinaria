@@ -2,6 +2,7 @@ import unittest
 from datetime import datetime, date
 from clinica import ClinicaVeterinaria
 
+
 class TestConsultas(unittest.TestCase):
 
     def setUp(self):
