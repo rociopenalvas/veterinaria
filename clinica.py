@@ -124,7 +124,7 @@ class ClinicaVeterinaria:
             raise ValueError("El dueño no existe.")
 
         # Buscar mascota
-        mascota = self._buscar_mascota(nombre_mascota, dueno)
+        mascota = self._buscar_mascota(nombre_mascota, dni_dueno)
         if mascota is None:
             raise ValueError("La mascota no existe.")
 
@@ -187,7 +187,7 @@ class ClinicaVeterinaria:
             raise ValueError("El dueño no existe. Debe registrarse primero.")
 
         # verificar duplicado
-        if self._buscar_mascota(nombre, dueno) is not None:
+        if self._buscar_mascota(nombre, dni_dueno) is not None:
             raise ValueError("Ya existe una mascota con ese nombre para ese dueño.")
 
         mascota = Mascota(especie, edad, nombre, raza, dueno)
@@ -200,7 +200,7 @@ class ClinicaVeterinaria:
         if dueno is None:
             raise ValueError("El dueño no existe.")
 
-        mascota = self._buscar_mascota(nombre, dueno)
+        mascota = self._buscar_mascota(nombre, dni_dueno)
 
         if mascota is None:
             raise ValueError("La mascota no existe.")
@@ -212,9 +212,9 @@ class ClinicaVeterinaria:
 
         self._mascotas.remove(mascota)
 
-    def _buscar_mascota(self, nombre: str, dueno: Dueno) -> Mascota:
+    def _buscar_mascota(self, nombre: str, dni_dueno: int) -> Mascota:
         for mascota in self._mascotas:
-            if mascota.get_nombre() == nombre and mascota.get_dueno() == dueno:
+            if mascota.get_nombre() == nombre and mascota.get_dueno().get_dni() == dni_dueno:
                 return mascota
         return None 
     
@@ -235,7 +235,7 @@ class ClinicaVeterinaria:
             raise ValueError("El dueño no existe.")
         
 
-        mascota = self._buscar_mascota(nombre, dueno)
+        mascota = self._buscar_mascota(nombre, dni_dueno)
 
         if mascota is None:
             raise ValueError("La mascota no existe.")
