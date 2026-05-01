@@ -11,7 +11,7 @@ class Dueno(Persona):
 
     def mostrar_info(self):
         print(f" DNI: {self._dni}")
-        print(f"  Nombre: {self._nombre}")
+        print(f" Nombre: {self._nombre}")
         print(f"  Teléfono: {self._telefono}")
         print(f"  Dirección: {self._direccion}")
 
