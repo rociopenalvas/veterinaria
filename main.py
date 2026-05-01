@@ -11,7 +11,7 @@ def main():
 
     # 🔽 CARGAR DATOS (si existen)
     try:
-        dao.cargar(clinica, "datos/")
+        dao.cargar(clinica, "data/")
     except:
         pass  # si no hay archivos todavía, no pasa nada
 
@@ -22,7 +22,7 @@ def main():
     menu.ejecutar()
 
     # 🔽 GUARDAR DATOS al salir
-    dao.guardar(clinica, "datos/")
+    dao.guardar(clinica, "data/")
 
 if __name__ == "__main__":
     main()

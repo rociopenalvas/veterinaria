@@ -63,7 +63,8 @@ class Turno:
 
     def mostrar_info(self):
         print(f"  Mascota: {self._mascota.get_nombre()}")
-        print(f"  Veterinario: {self._veterinario.get_nombre()}")
+        print(f"  Dueño: {self._mascota.get_dueno().get_nombre()} DNI: {self._mascota.get_dueno().get_dni()}")
+        print(f"  Veterinario: {self._veterinario.get_nombre()} Matrícula: {self._veterinario.get_matricula()}")
         print(f"  Fecha y hora: {self._fecha_hora}")
         print(f"  Consultorio: {self._consultorio.get_numero()}")
         print(f"  Estado: {self._estado}")

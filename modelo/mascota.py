@@ -23,7 +23,7 @@ class Mascota(Animal):
 
     def mostrar_info(self):
         print(f"  Nombre: {self._nombre}")
-        print(f"  Especie: {self._especie}")
-        print(f"  Edad: {self._edad} años")
-        print(f"  Raza: {self._raza}")
-        print(f"  Dueño: {self._dueno.get_nombre()}")
+        print(f"   Especie: {self._especie}")
+        print(f"   Edad: {self._edad} años")
+        print(f"   Raza: {self._raza}")
+        print(f"  Dueño: {self._dueno.get_nombre()} DNI: {self._dueno.get_dni()}")

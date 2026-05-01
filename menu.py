@@ -2,13 +2,20 @@ from datetime import datetime
 from dao.clinica_dao import ClinicaDAO
 from clinica import ClinicaVeterinaria
 
+def guardar_automatico(func):
+    def wrapper(self, *args, **kwargs):
+        resultado = func(self, *args, **kwargs)
+        self._guardar()
+        return resultado
+    return wrapper
+
 class Menu:
     def __init__(self, clinica):
         self._clinica = clinica
         self._dao = ClinicaDAO()
 
     def _guardar(self):
-        self._dao.guardar(self._clinica, "datos/")
+        self._dao.guardar(self._clinica, "data/")
 
     def ejecutar(self):
         while True:
@@ -60,37 +67,16 @@ class Menu:
 
             try:
                 if opcion == "1":
-                    dni = self._pedir_entero("DNI: ")
-                    nombre = input("Nombre: ")
-                    telefono = input("Teléfono (XXX XXXX-XXXX): ").strip()
-                    direccion = input("Dirección: ")
-
-                    self._clinica.registrar_dueno(
-                        dni, nombre, telefono, direccion
-                    )
-
-                    print("Dueño registrado con éxito.")
+                    self._registrar_dueno()
 
                 elif opcion == "2":
-                    self._clinica.listar_duenos()
+                    self._listar_duenos()
 
                 elif opcion == "3":
-                    dni = self._pedir_entero("DNI: ")
-                    telefono = input("Nuevo teléfono (XXX XXXX-XXXX): ").strip()
-                    direccion = input("Nueva dirección: ")
-
-                    self._clinica.modificar_dueno(
-                        dni, telefono, direccion
-                    )
-
-                    print("Dueño modificado.")
+                    self._modificar_dueno()
 
                 elif opcion == "4":
-                    dni = self._pedir_entero("DNI: ")
-
-                    self._clinica.eliminar_dueno(dni)
-
-                    print("Dueño eliminado.")
+                    self._eliminar_dueno()
 
                 elif opcion == "0":
                     break
@@ -100,6 +86,42 @@ class Menu:
 
             except ValueError as e:
                 print("Error:", e)
+
+    @guardar_automatico
+    def _registrar_dueno(self):
+        dni = self._pedir_entero("DNI: ")
+        nombre = input("Nombre: ")
+        telefono = input("Teléfono (XXX XXXX-XXXX): ").strip()
+        direccion = input("Dirección: ")
+
+        self._clinica.registrar_dueno(
+            dni, nombre, telefono, direccion
+        )
+
+        print("Dueño registrado con éxito.")
+
+    def _listar_duenos(self):
+        self._clinica.listar_duenos()
+
+    @guardar_automatico
+    def _modificar_dueno(self):
+        dni = self._pedir_entero("DNI: ")
+        telefono = input("Nuevo teléfono (XXX XXXX-XXXX): ").strip()
+        direccion = input("Nueva dirección: ")
+
+        self._clinica.modificar_dueno(
+            dni, telefono, direccion
+        )
+
+        print("Dueño modificado.")
+
+    @guardar_automatico
+    def _eliminar_dueno(self):
+        dni = self._pedir_entero("DNI: ")
+
+        self._clinica.eliminar_dueno(dni)
+
+        print("Dueño eliminado.")
 
     def _menu_veterinarios(self):
         while True:
@@ -114,38 +136,16 @@ class Menu:
 
             try:
                 if opcion == "1":
-                    dni = self._pedir_entero("DNI: ")
-                    nombre = input("Nombre: ")
-                    telefono = input("Teléfono (XXX XXXX-XXXX): ").strip()
-                    matricula = input("Matrícula: ")
-                    especialidad = input("Especialidad: ")
-
-                    self._clinica.registrar_veterinario(
-                        dni, nombre, telefono, matricula, especialidad
-                    )
-
-                    print("Veterinario registrado con éxito.")
+                    self._registrar_veterinario()
 
                 elif opcion == "2":
-                    self._clinica.listar_veterinarios()
+                    self._listar_veterinarios()
 
                 elif opcion == "3":
-                    matricula = input("Matrícula: ")
-                    telefono = input("Nuevo teléfono (XXX XXXX-XXXX): ").strip()
-                    especialidad = input("Nueva especialidad: ")
-
-                    self._clinica.modificar_veterinario(
-                        matricula, telefono, especialidad
-                    )
-
-                    print("Veterinario modificado.")
+                    self._modificar_veterinario()
 
                 elif opcion == "4":
-                    matricula = input("Matrícula: ")
-
-                    self._clinica.eliminar_veterinario(matricula)
-
-                    print("Veterinario eliminado.")
+                    self._eliminar_veterinario()
 
                 elif opcion == "0":
                     break
@@ -155,6 +155,43 @@ class Menu:
 
             except ValueError as e:
                 print("Error:", e)
+
+    @guardar_automatico
+    def _registrar_veterinario(self):
+        dni = self._pedir_entero("DNI: ")
+        nombre = input("Nombre: ")
+        telefono = input("Teléfono (XXX XXXX-XXXX): ").strip()
+        matricula = input("Matrícula: ")
+        especialidad = input("Especialidad: ")
+
+        self._clinica.registrar_veterinario(
+            dni, nombre, telefono, matricula, especialidad
+        )
+
+        print("Veterinario registrado con éxito.")
+
+    def _listar_veterinarios(self):
+        self._clinica.listar_veterinarios()
+
+    @guardar_automatico
+    def _modificar_veterinario(self):
+        matricula = input("Matrícula: ")
+        telefono = input("Nuevo teléfono (XXX XXXX-XXXX): ").strip()
+        especialidad = input("Nueva especialidad: ")
+
+        self._clinica.modificar_veterinario(
+            matricula, telefono, especialidad
+        )
+
+        print("Veterinario modificado.")
+
+    @guardar_automatico
+    def _eliminar_veterinario(self):
+        matricula = input("Matrícula: ")
+
+        self._clinica.eliminar_veterinario(matricula)
+
+        print("Veterinario eliminado.")
 
     def _menu_consultorios(self):
         while True:
@@ -169,34 +206,16 @@ class Menu:
 
             try:
                 if opcion == "1":
-                    numero = self._pedir_entero("Número: ")
-                    descripcion = input("Descripción: ")
-
-                    self._clinica.registrar_consultorio(
-                        numero, descripcion
-                    )
-
-                    print("Consultorio registrado con éxito.")
+                    self._registrar_consultorio()
 
                 elif opcion == "2":
-                    self._clinica.listar_consultorios()
+                    self._listar_consultorios()
 
                 elif opcion == "3":
-                    numero = self._pedir_entero("Número: ")
-                    descripcion = input("Nueva descripción: ")
-
-                    self._clinica.modificar_consultorio(
-                        numero, descripcion
-                    )
-
-                    print("Consultorio modificado.")
+                    self._modificar_consultorio()
 
                 elif opcion == "4":
-                    numero = self._pedir_entero("Número: ")
-
-                    self._clinica.eliminar_consultorio(numero)
-
-                    print("Consultorio eliminado.")
+                    self._eliminar_consultorio()
 
                 elif opcion == "0":
                     break
@@ -207,6 +226,39 @@ class Menu:
             except ValueError as e:
                 print("Error:", e)
 
+    @guardar_automatico
+    def _registrar_consultorio(self):
+        numero = self._pedir_entero("Número: ")
+        descripcion = input("Descripción: ")
+
+        self._clinica.registrar_consultorio(
+            numero, descripcion
+        )
+
+        print("Consultorio registrado con éxito.")
+
+    def _listar_consultorios(self):
+        self._clinica.listar_consultorios()
+
+    @guardar_automatico
+    def _modificar_consultorio(self):
+        numero = self._pedir_entero("Número: ")
+        descripcion = input("Nueva descripción: ")
+
+        self._clinica.modificar_consultorio(
+            numero, descripcion
+        )
+
+        print("Consultorio modificado.")
+
+    @guardar_automatico
+    def _eliminar_consultorio(self):
+        numero = self._pedir_entero("Número: ")
+
+        self._clinica.eliminar_consultorio(numero)
+
+        print("Consultorio eliminado.")
+        
     def _menu_mascotas(self):
         while True:
             print("\n--- MASCOTAS ---")
@@ -220,41 +272,16 @@ class Menu:
 
             try:
                 if opcion == "1":
-                    nombre = input("Nombre: ")
-                    especie = input("Especie: ")
-                    edad = self._pedir_entero("Edad: ")
-                    raza = input("Raza: ")
-                    dni_dueno = self._pedir_entero("DNI del dueño: ")
-
-                    self._clinica.registrar_mascota(
-                        nombre, especie, edad, raza, dni_dueno
-                    )
-
-                    print("Mascota registrada con éxito.")
+                    self._registrar_mascota()
 
                 elif opcion == "2":
-                    self._clinica.listar_mascotas()
+                    self._listar_mascotas()
 
                 elif opcion == "3":
-                    nombre = input("Nombre de la mascota: ")
-                    dni_dueno = self._pedir_entero("DNI del dueño: ")
-                    nueva_edad = self._pedir_entero("Nueva edad: ")
-
-                    self._clinica.modificar_mascota(
-                        nombre, dni_dueno, nueva_edad
-                    )
-
-                    print("Mascota modificada.")
+                    self._modificar_mascota()
 
                 elif opcion == "4":
-                    nombre = input("Nombre de la mascota: ")
-                    dni_dueno = self._pedir_entero("DNI del dueño: ")
-
-                    self._clinica.eliminar_mascota(
-                        nombre, dni_dueno
-                    )
-
-                    print("Mascota eliminada.")
+                    self._eliminar_mascota()
 
                 elif opcion == "0":
                     break
@@ -264,7 +291,47 @@ class Menu:
 
             except ValueError as e:
                 print("Error:", e) 
-    
+
+    @guardar_automatico
+    def _registrar_mascota(self):
+        nombre = input("Nombre: ")
+        especie = input("Especie: ")
+        edad = self._pedir_entero("Edad: ")
+        raza = input("Raza: ")
+        dni_dueno = self._pedir_entero("DNI del dueño: ")
+
+        self._clinica.registrar_mascota(
+            nombre, especie, edad, raza, dni_dueno
+        )
+
+        print("Mascota registrada con éxito.")
+
+    def _listar_mascotas(self):
+        self._clinica.listar_mascotas()
+
+    @guardar_automatico
+    def _modificar_mascota(self):
+        nombre = input("Nombre de la mascota: ")
+        dni_dueno = self._pedir_entero("DNI del dueño: ")
+        nueva_edad = self._pedir_entero("Nueva edad: ")
+
+        self._clinica.modificar_mascota(
+            nombre, dni_dueno, nueva_edad
+        )
+
+        print("Mascota modificada.")
+
+    @guardar_automatico
+    def _eliminar_mascota(self):
+        nombre = input("Nombre de la mascota: ")
+        dni_dueno = self._pedir_entero("DNI del dueño: ")
+
+        self._clinica.eliminar_mascota(
+            nombre, dni_dueno
+        )
+
+        print("Mascota eliminada.")
+
     def _menu_turnos(self):
         while True:
             print("\n--- TURNOS ---")
@@ -282,7 +349,7 @@ class Menu:
                     self._agendar_turno()
 
                 elif opcion == "2":
-                    self._clinica.listar_turnos()
+                    self._listar_turnos()
 
                 elif opcion == "3":
                     self._modificar_turno()
@@ -312,6 +379,7 @@ class Menu:
         except ValueError:
             raise ValueError("Formato de fecha inválido.") 
     
+    @guardar_automatico
     def _agendar_turno(self):
         nombre = input("Nombre mascota: ")
         dni = self._pedir_entero("DNI dueño: ")
@@ -328,6 +396,10 @@ class Menu:
             fecha
         )
 
+    def _listar_turnos(self):
+        self._clinica.listar_turnos()
+
+    @guardar_automatico
     def _modificar_turno(self):
             id_turno = int(input("ID del turno: "))
             nueva_fecha = self._pedir_fecha_hora()
@@ -340,6 +412,7 @@ class Menu:
             print("Turno modificado.")
             print("Turno agendado con éxito.")
 
+    @guardar_automatico
     def _cancelar_turno(self):
         id_turno = int(input("ID del turno: "))
 

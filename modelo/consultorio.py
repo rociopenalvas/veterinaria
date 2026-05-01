@@ -14,8 +14,7 @@ class Consultorio:
         return self._descripcion
 
     def mostrar_info(self):
-        print("Consultorio:")
-        print(f"  Número: {self._numero}")
+        print(f" Número: {self._numero}")
         print(f"  Descripción: {self._descripcion}")
 
     def set_descripcion(self, descripcion: str):

@@ -17,7 +17,7 @@ class Veterinario(Persona):
         print(f" DNI: {self._dni}")
         print(f"  Nombre: {self._nombre}")
         print(f"  Teléfono: {self._telefono}")
-        print(f"  Matrícula: {self._matricula}")
+        print(f" Matrícula: {self._matricula}")
         print(f"  Especialidad: {self._especialidad}")
 
     def set_telefono(self, telefono: str):
