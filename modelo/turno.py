@@ -1,8 +1,8 @@
 from datetime import datetime
 
-from mascota import Mascota
-from veterinario import Veterinario
-from consultorio import Consultorio
+from modelo.mascota import Mascota
+from modelo.veterinario import Veterinario
+from modelo.consultorio import Consultorio
 
 class Turno:
     """

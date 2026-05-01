@@ -1,9 +1,14 @@
 from datetime import datetime
+from dao.clinica_dao import ClinicaDAO
 from clinica import ClinicaVeterinaria
 
 class Menu:
     def __init__(self, clinica):
         self._clinica = clinica
+        self._dao = ClinicaDAO()
+
+    def _guardar(self):
+        self._dao.guardar(self._clinica, "datos/")
 
     def ejecutar(self):
         while True:

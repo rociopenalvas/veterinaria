@@ -1,5 +1,5 @@
-from animal import Animal
-from dueno import Dueno
+from modelo.animal import Animal
+from modelo.dueno import Dueno
 
 
 class Mascota(Animal):

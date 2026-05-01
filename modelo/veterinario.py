@@ -1,4 +1,4 @@
-from persona import Persona
+from modelo.persona import Persona
 
 
 class Veterinario(Persona):

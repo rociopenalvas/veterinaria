@@ -1,14 +1,28 @@
 from clinica import ClinicaVeterinaria
+from dao.clinica_dao import ClinicaDAO
 from menu import Menu
 
 def main():
-    # Crear la clínica que controla los turnos
+    # Crear la clínica
     clinica = ClinicaVeterinaria("VVeterinariaaa")
 
-    # Crear el menú
+    # Crear DAO
+    dao = ClinicaDAO()
+
+    # 🔽 CARGAR DATOS (si existen)
+    try:
+        dao.cargar(clinica, "datos/")
+    except:
+        pass  # si no hay archivos todavía, no pasa nada
+
+    # Crear menú
     menu = Menu(clinica)
 
+    # Ejecutar programa
     menu.ejecutar()
+
+    # 🔽 GUARDAR DATOS al salir
+    dao.guardar(clinica, "datos/")
 
 if __name__ == "__main__":
     main()

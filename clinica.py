@@ -1,8 +1,8 @@
-from turno import Turno
-from mascota import Mascota
-from veterinario import Veterinario
-from consultorio import Consultorio
-from dueno import Dueno
+from modelo.turno import Turno
+from modelo.mascota import Mascota
+from modelo.veterinario import Veterinario
+from modelo.consultorio import Consultorio
+from modelo.dueno import Dueno
 from datetime import date
 
 
