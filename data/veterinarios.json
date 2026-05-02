@@ -1,9 +1,23 @@
 [
     {
-        "dni": 48582831,
-        "nombre": "Flor",
-        "telefono": "01154293411",
-        "matricula": "888M",
-        "especialidad": "No se"
+        "dni": 20111222,
+        "nombre": "Dra. Laura M\u00e9ndez",
+        "telefono": "01159876543",
+        "matricula": "MPV-4521",
+        "especialidad": "Cl\u00ednica general"
+    },
+    {
+        "dni": 20222333,
+        "nombre": "Dr. Pablo Ruiz",
+        "telefono": "01158765432",
+        "matricula": "MPV-8890",
+        "especialidad": "Cirug\u00eda menor"
+    },
+    {
+        "dni": 20333444,
+        "nombre": "Dra. Luc\u00eda Ortega",
+        "telefono": "01157654321",
+        "matricula": "MPV-1209",
+        "especialidad": "Dermatolog\u00eda"
     }
 ]

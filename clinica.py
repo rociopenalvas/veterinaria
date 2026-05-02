@@ -3,7 +3,7 @@ from modelo.mascota import Mascota
 from modelo.veterinario import Veterinario
 from modelo.consultorio import Consultorio
 from modelo.dueno import Dueno
-from datetime import date
+from datetime import date, datetime
 
 
 class ClinicaVeterinaria:
@@ -145,12 +145,88 @@ class ClinicaVeterinaria:
         # Si pasa las validaciones, se agenda
         self._turnos.append(turno)
 
-    def listar_turnos(self):
+    def restaurar_turno(
+        self,
+        nombre_mascota: str,
+        dni_dueno: int,
+        matricula: str,
+        numero_consultorio: int,
+        fecha_hora,
+        id_turno: int,
+        estado: str,
+    ):
         """
-        Muestra todos los turnos registrados.
+        Reconstruye un turno desde JSON (id y estado obligatorios en el archivo).
+        No exige fecha futura: sirve para cargar datos persistidos.
         """
-        print(f"\nTurnos en {self._nombre}:")
-        for turno in self._turnos:
+        if nombre_mascota.strip() == "":
+            raise ValueError("Nombre de mascota inválido.")
+
+        if dni_dueno < 10000000 or dni_dueno > 99999999:
+            raise ValueError("DNI inválido.")
+
+        if matricula.strip() == "":
+            raise ValueError("Matrícula inválida.")
+
+        if numero_consultorio <= 0:
+            raise ValueError("Número de consultorio inválido.")
+
+        dueno = self._buscar_dueno_por_dni(dni_dueno)
+        if dueno is None:
+            raise ValueError("El dueño no existe.")
+
+        mascota = self._buscar_mascota(nombre_mascota, dni_dueno)
+        if mascota is None:
+            raise ValueError("La mascota no existe.")
+
+        veterinario = self._buscar_veterinario_por_matricula(matricula)
+        if veterinario is None:
+            raise ValueError("El veterinario no existe.")
+
+        consultorio = self._buscar_consultorio_por_numero(numero_consultorio)
+        if consultorio is None:
+            raise ValueError("El consultorio no existe.")
+
+        if estado not in ("Activo", "Cancelado"):
+            estado = "Activo"
+
+        turno = Turno(
+            mascota,
+            veterinario,
+            fecha_hora,
+            consultorio,
+            id_existente=id_turno,
+            estado=estado,
+            validar_fecha_futura=False,
+        )
+        self._hay_problema(turno)
+        self._turnos.append(turno)
+
+    def listar_turnos_proximos(self):
+        """Turnos con fecha/hora estrictamente posteriores a ahora (activos y cancelados)."""
+        ahora = datetime.now()
+        proximos = [t for t in self._turnos if t.get_fecha_hora() > ahora]
+        proximos.sort(key=lambda t: t.get_fecha_hora())
+
+        print(f"\nPróximos turnos en {self._nombre}:")
+        if not proximos:
+            print("No hay próximos turnos.")
+            return
+        for turno in proximos:
+            turno.mostrar_info()
+            print("-------------------")
+
+    def listar_turnos_pasados(self):
+        """Turnos con fecha/hora en el momento actual o anteriores (activos y cancelados)."""
+        ahora = datetime.now()
+        pasados = [t for t in self._turnos if t.get_fecha_hora() <= ahora]
+        pasados.sort(key=lambda t: t.get_fecha_hora(), reverse=True)
+
+        print(f"\nTurnos pasados en {self._nombre}:")
+        if not pasados:
+            print("No hay turnos pasados.")
+            return
+        for turno in pasados:
             turno.mostrar_info()
             print("-------------------")
 

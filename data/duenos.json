@@ -1,8 +1,26 @@
 [
     {
-        "dni": 43532333,
-        "nombre": "ro",
-        "telefono": "01136900244",
-        "direccion": "Santa Fe 4424"
+        "dni": 30123456,
+        "nombre": "Ana Garc\u00eda",
+        "telefono": "01141234567",
+        "direccion": "Av. Corrientes 1234, CABA"
+    },
+    {
+        "dni": 30234567,
+        "nombre": "Carlos L\u00f3pez",
+        "telefono": "01152345678",
+        "direccion": "Mitre 500, Rosario"
+    },
+    {
+        "dni": 30345678,
+        "nombre": "Mar\u00eda Fern\u00e1ndez",
+        "telefono": "01163456789",
+        "direccion": "San Mart\u00edn 200, Mendoza"
+    },
+    {
+        "dni": 30456789,
+        "nombre": "Jorge Mart\u00ednez",
+        "telefono": "01174567890",
+        "direccion": "Santa Fe 4424, CABA"
     }
 ]

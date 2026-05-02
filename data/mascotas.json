@@ -1,1 +1,37 @@
-[]
+[
+    {
+        "nombre": "Luna",
+        "especie": "Perro",
+        "edad": 4,
+        "raza": "Mestizo",
+        "dni_dueno": 30123456
+    },
+    {
+        "nombre": "Michi",
+        "especie": "Gato",
+        "edad": 2,
+        "raza": "Siam\u00e9s",
+        "dni_dueno": 30123456
+    },
+    {
+        "nombre": "Rocky",
+        "especie": "Perro",
+        "edad": 7,
+        "raza": "Ovejero alem\u00e1n",
+        "dni_dueno": 30234567
+    },
+    {
+        "nombre": "Coco",
+        "especie": "Conejo",
+        "edad": 1,
+        "raza": "Angora",
+        "dni_dueno": 30345678
+    },
+    {
+        "nombre": "Nina",
+        "especie": "Gato",
+        "edad": 5,
+        "raza": "Persa",
+        "dni_dueno": 30456789
+    }
+]

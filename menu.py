@@ -336,10 +336,11 @@ class Menu:
         while True:
             print("\n--- TURNOS ---")
             print("1. Agendar")
-            print("2. Listar")
-            print("3. Modificar fecha")
-            print("4. Cancelar")
-            print("5. Consultas")
+            print("2. Listar próximos turnos")
+            print("3. Listar turnos pasados")
+            print("4. Modificar fecha")
+            print("5. Cancelar")
+            print("6. Consultas")
             print("0. Volver")
 
             opcion = input("Opción: ")
@@ -349,15 +350,18 @@ class Menu:
                     self._agendar_turno()
 
                 elif opcion == "2":
-                    self._listar_turnos()
+                    self._listar_turnos_proximos()
 
                 elif opcion == "3":
-                    self._modificar_turno()
+                    self._listar_turnos_pasados()
 
                 elif opcion == "4":
-                    self._cancelar_turno()
+                    self._modificar_turno()
 
                 elif opcion == "5":
+                    self._cancelar_turno()
+
+                elif opcion == "6":
                     self._consultas_turnos()
 
                 elif opcion == "0":
@@ -396,8 +400,11 @@ class Menu:
             fecha
         )
 
-    def _listar_turnos(self):
-        self._clinica.listar_turnos()
+    def _listar_turnos_proximos(self):
+        self._clinica.listar_turnos_proximos()
+
+    def _listar_turnos_pasados(self):
+        self._clinica.listar_turnos_pasados()
 
     @guardar_automatico
     def _modificar_turno(self):
@@ -410,7 +417,6 @@ class Menu:
             )
 
             print("Turno modificado.")
-            print("Turno agendado con éxito.")
 
     @guardar_automatico
     def _cancelar_turno(self):

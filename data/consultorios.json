@@ -1,1 +1,14 @@
-[]
+[
+    {
+        "numero": 1,
+        "descripcion": "Consultorio general y vacunatorio"
+    },
+    {
+        "numero": 2,
+        "descripcion": "Consultorio quir\u00fargico ambulatorio"
+    },
+    {
+        "numero": 3,
+        "descripcion": "Observaci\u00f3n y recuperaci\u00f3n"
+    }
+]
