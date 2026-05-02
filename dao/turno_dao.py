@@ -2,6 +2,8 @@ import json
 from datetime import datetime
 import os
 
+from modelo.turno import Turno
+
 
 class TurnoDAO:
 
@@ -12,6 +14,7 @@ class TurnoDAO:
 
         for t in turnos:
             data.append({
+                "id": t.get_id(),
                 "nombre_mascota": t.get_mascota().get_nombre(),
                 "dni_dueno": t.get_mascota().get_dueno().get_dni(),
                 "matricula": t.get_veterinario().get_matricula(),
@@ -30,14 +33,14 @@ class TurnoDAO:
         for t in data:
             fecha = datetime.fromisoformat(t["fecha"])
 
-            clinica.agendar_turno(
+            clinica.restaurar_turno(
                 t["nombre_mascota"],
                 t["dni_dueno"],
                 t["matricula"],
                 t["consultorio"],
-                fecha
+                fecha,
+                t["id"],
+                t["estado"],
             )
 
-            # manejar estado
-            if t["estado"] == "Cancelado":
-                clinica._turnos[-1].cancelar()
+        Turno.sincronizar_contador_tras_carga(clinica._turnos)

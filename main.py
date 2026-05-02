@@ -1,3 +1,5 @@
+import json
+
 from clinica import ClinicaVeterinaria
 from dao.clinica_dao import ClinicaDAO
 from menu import Menu
@@ -9,11 +11,15 @@ def main():
     # Crear DAO
     dao = ClinicaDAO()
 
-    # 🔽 CARGAR DATOS (si existen)
+    # Cargar datos si existen archivos en data/
     try:
         dao.cargar(clinica, "data/")
-    except:
-        pass  # si no hay archivos todavía, no pasa nada
+    except FileNotFoundError:
+        pass  # primera ejecución o todavía no guardaste nada
+    except json.JSONDecodeError as e:
+        print("Error: un archivo en data/ no es JSON válido.", e)
+    except (ValueError, KeyError) as e:
+        print("Error al cargar datos (dato repetido, incompleto o turno inválido):", e)
 
     # Crear menú
     menu = Menu(clinica)

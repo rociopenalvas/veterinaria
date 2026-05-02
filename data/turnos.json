@@ -10,20 +10,20 @@
     },
     {
         "id": 2,
-        "nombre_mascota": "Rocky",
-        "dni_dueno": 30234567,
+        "nombre_mascota": "Michi",
+        "dni_dueno": 30123456,
         "matricula": "MPV-8890",
         "consultorio": 2,
-        "fecha": "2025-06-10T09:00:00",
+        "fecha": "2026-06-10T10:00:00",
         "estado": "Activo"
     },
     {
         "id": 3,
-        "nombre_mascota": "Michi",
-        "dni_dueno": 30123456,
+        "nombre_mascota": "Rocky",
+        "dni_dueno": 30234567,
         "matricula": "MPV-1209",
         "consultorio": 3,
-        "fecha": "2026-06-10T10:30:00",
+        "fecha": "2026-06-11T10:30:00",
         "estado": "Activo"
     },
     {
@@ -32,7 +32,7 @@
         "dni_dueno": 30345678,
         "matricula": "MPV-4521",
         "consultorio": 2,
-        "fecha": "2026-06-11T11:00:00",
+        "fecha": "2026-06-11T14:00:00",
         "estado": "Activo"
     },
     {
@@ -41,16 +41,16 @@
         "dni_dueno": 30456789,
         "matricula": "MPV-8890",
         "consultorio": 1,
-        "fecha": "2026-06-12T15:00:00",
-        "estado": "Activo"
+        "fecha": "2026-06-15T16:00:00",
+        "estado": "Cancelado"
     },
     {
         "id": 6,
         "nombre_mascota": "Luna",
         "dni_dueno": 30123456,
-        "matricula": "MPV-8890",
+        "matricula": "MPV-1209",
         "consultorio": 3,
-        "fecha": "2026-06-09T16:00:00",
-        "estado": "Cancelado"
+        "fecha": "2026-04-20T11:00:00",
+        "estado": "Activo"
     }
 ]

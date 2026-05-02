@@ -1,3 +1,4 @@
+import os
 import unittest
 from datetime import datetime
 from clinica import ClinicaVeterinaria
@@ -22,6 +23,7 @@ class TestTurnoDAO(unittest.TestCase):
         fecha = datetime(2032, 12, 12, 10, 0)
 
         clinica.agendar_turno("Mambo", 47111111, "MAT1", 1, fecha)
+        id_antes = clinica._turnos[0].get_id()
 
         # DAO
         dao_dueno = DuenoDAO()
@@ -29,6 +31,8 @@ class TestTurnoDAO(unittest.TestCase):
         dao_vet = VeterinarioDAO()
         dao_cons = ConsultorioDAO()
         dao_turno = TurnoDAO()
+
+        os.makedirs("test_data", exist_ok=True)
 
         # guardar
         dao_dueno.guardar(clinica._duenos, "test_data/duenos.json")
@@ -52,3 +56,9 @@ class TestTurnoDAO(unittest.TestCase):
 
         self.assertEqual("Mambo", t.get_mascota().get_nombre())
         self.assertEqual("MAT1", t.get_veterinario().get_matricula())
+        self.assertEqual(id_antes, t.get_id())
+        self.assertEqual("Activo", t.get_estado())
+
+        otra_fecha = datetime(2032, 12, 14, 11, 0)
+        nueva.agendar_turno("Mambo", 47111111, "MAT1", 1, otra_fecha)
+        self.assertEqual(id_antes + 1, nueva._turnos[1].get_id())
