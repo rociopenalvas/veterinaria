@@ -2,6 +2,8 @@ from modelo.persona import Persona
 
 
 class Veterinario(Persona):
+    """Representa a un veterinario de la clínica."""
+
     def __init__(self, dni: int, nombre: str, telefono: str, matricula: str, especialidad: str):
         super().__init__(dni, nombre, telefono)
         self._matricula = matricula
@@ -13,7 +15,7 @@ class Veterinario(Persona):
     def get_especialidad(self) -> str:
         return self._especialidad
 
-    def mostrar_info(self):
+    def mostrar_info(self) -> None:
         print(f" DNI: {self._dni}")
         print(f"  Nombre: {self._nombre}")
         print(f"  Teléfono: {self._telefono}")

@@ -2,6 +2,8 @@ from modelo.persona import Persona
 
 
 class Dueno(Persona):
+    """Representa al dueño de una o más mascotas."""
+
     def __init__(self, dni: int, nombre: str, telefono: str, direccion: str):
         super().__init__(dni, nombre, telefono)
         self._direccion = direccion
@@ -9,7 +11,7 @@ class Dueno(Persona):
     def get_direccion(self) -> str:
         return self._direccion
 
-    def mostrar_info(self):
+    def mostrar_info(self) -> None:
         print(f" DNI: {self._dni}")
         print(f"  Nombre: {self._nombre}")
         print(f"  Teléfono: {self._telefono}")

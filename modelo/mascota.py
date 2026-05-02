@@ -3,6 +3,8 @@ from modelo.dueno import Dueno
 
 
 class Mascota(Animal):
+    """Representa una mascota atendida por la clínica."""
+
     def __init__(self, especie: str, edad: int, nombre: str, raza: str, dueno: Dueno):
         super().__init__(especie, edad)
         self._nombre = nombre
@@ -17,11 +19,11 @@ class Mascota(Animal):
 
     def get_dueno(self) -> Dueno:
         return self._dueno
-    
-    def set_edad(self, edad: int):
+
+    def set_edad(self, edad: int) -> None:
         self._edad = edad
 
-    def mostrar_info(self):
+    def mostrar_info(self) -> None:
         print(f"  Nombre: {self._nombre}")
         print(f"   Especie: {self._especie}")
         print(f"   Edad: {self._edad} años")

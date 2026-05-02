@@ -13,7 +13,7 @@ class Turno:
     """
     DURACION_MINUTOS = 30
 
-    #Contador para enumerar e identificar los turnos
+    # Contador para asignar IDs únicos.
     _contador_id = 1
 
     def __init__(
@@ -27,6 +27,7 @@ class Turno:
         estado: Optional[str] = None,
         validar_fecha_futura: bool = True,
     ):
+        self._validar_bloque_horario(fecha_hora)
         if validar_fecha_futura and fecha_hora <= datetime.now():
             raise ValueError("La fecha y hora del turno debe ser futura.")
         self._mascota = mascota
@@ -39,6 +40,16 @@ class Turno:
         else:
             self._id = Turno._contador_id
             Turno._contador_id += 1
+
+    @classmethod
+    def _validar_bloque_horario(cls, fecha_hora: datetime) -> None:
+        if not (
+            fecha_hora.minute == 0
+            or fecha_hora.minute == 15
+            or fecha_hora.minute == 30
+            or fecha_hora.minute == 45
+        ) or fecha_hora.second != 0:
+            raise ValueError("El turno debe comenzar en minuto 00, 15, 30 o 45.")
 
     @classmethod
     def sincronizar_contador_tras_carga(cls, turnos: list) -> None:
@@ -69,7 +80,7 @@ class Turno:
         return self._id
 
     # Métodos principales
-    def cancelar(self):
+    def cancelar(self) -> None:
         self._estado = "Cancelado"
 
     def modificar_fecha(self, nueva_fecha_hora: datetime):
@@ -79,9 +90,10 @@ class Turno:
         """
         if nueva_fecha_hora <= datetime.now():
             raise ValueError("La nueva fecha debe ser futura.")
+        self._validar_bloque_horario(nueva_fecha_hora)
         self._fecha_hora = nueva_fecha_hora
 
-    def mostrar_info(self):
+    def mostrar_info(self) -> None:
         print(f"  Mascota: {self._mascota.get_nombre()}")
         print(f"  Dueño: {self._mascota.get_dueno().get_nombre()} DNI: {self._mascota.get_dueno().get_dni()}")
         print(f"  Veterinario: {self._veterinario.get_nombre()} Matrícula: {self._veterinario.get_matricula()}")

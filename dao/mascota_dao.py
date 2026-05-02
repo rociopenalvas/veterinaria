@@ -1,9 +1,13 @@
 import json
+import os
 
 
 class MascotaDAO:
+    """Persistencia de mascotas en formato JSON."""
 
     def guardar(self, mascotas, path):
+        """Guarda la colección de mascotas en disco."""
+        os.makedirs(os.path.dirname(path), exist_ok=True)
         data = []
 
         for m in mascotas:
@@ -19,6 +23,7 @@ class MascotaDAO:
             json.dump(data, f, indent=4)
 
     def cargar(self, path, clinica):
+        """Carga mascotas desde disco y las registra en la clínica."""
         with open(path, "r") as f:
             data = json.load(f)
 

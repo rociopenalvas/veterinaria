@@ -2,6 +2,8 @@ from abc import ABC, abstractmethod
 
 
 class Animal(ABC):
+    """Clase base abstracta para animales del sistema."""
+
     def __init__(self, especie: str, edad: int):
         self._especie = especie
         self._edad = edad
@@ -13,5 +15,5 @@ class Animal(ABC):
         return self._edad
 
     @abstractmethod
-    def mostrar_info(self):
-        pass
+    def mostrar_info(self) -> None:
+        """Muestra información del animal en consola."""

@@ -1,9 +1,13 @@
 import json
+import os
 
 
 class ConsultorioDAO:
+    """Persistencia de consultorios en formato JSON."""
 
     def guardar(self, consultorios, path):
+        """Guarda la colección de consultorios en disco."""
+        os.makedirs(os.path.dirname(path), exist_ok=True)
         data = []
 
         for c in consultorios:
@@ -16,6 +20,7 @@ class ConsultorioDAO:
             json.dump(data, f, indent=4)
 
     def cargar(self, path, clinica):
+        """Carga consultorios desde disco y los registra en la clínica."""
         with open(path, "r") as f:
             data = json.load(f)
 

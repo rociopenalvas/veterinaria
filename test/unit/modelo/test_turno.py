@@ -93,6 +93,31 @@ class TestTurno(unittest.TestCase):
         with self.assertRaises(ValueError):
             self.clinica.agendar_turno("Mambo", 47111111, "MAT2", 1, fecha)
 
+    def test_agendar_turno_minuto_no_permitido(self):
+        fecha = datetime(2032, 12, 12, 10, 10)
+
+        with self.assertRaises(ValueError):
+            self.clinica.agendar_turno("Mambo", 47111111, "MAT1", 1, fecha)
+
+    def test_agendar_turno_minuto_permitido_15(self):
+        fecha = datetime(2032, 12, 12, 10, 15)
+
+        self.clinica.agendar_turno("Mambo", 47111111, "MAT1", 1, fecha)
+
+        self.assertEqual(1, len(self.clinica._turnos))
+        self.assertEqual(fecha, self.clinica._turnos[0].get_fecha_hora())
+
+    def test_turno_superpuesto_intervalo_mismo_veterinario(self):
+        self.clinica.registrar_consultorio(2, "Consultorio 2")
+        self.clinica.registrar_dueno(47222222, "Juan", "01122222222", "Otra")
+        self.clinica.registrar_mascota("Luna", "Gato", 3, "Siames", 47222222)
+
+        self.clinica.agendar_turno("Mambo", 47111111, "MAT1", 1, datetime(2032, 12, 12, 10, 0))
+
+        with self.assertRaises(ValueError):
+            # mismo veterinario, intervalo solapado (10:00-10:30 vs 10:15-10:45)
+            self.clinica.agendar_turno("Luna", 47222222, "MAT1", 2, datetime(2032, 12, 12, 10, 15))
+
     # ✔ cancelar OK
     def test_cancelar_turno_ok(self):
         fecha = datetime(2032, 12, 12, 10, 0)
@@ -144,6 +169,43 @@ class TestTurno(unittest.TestCase):
 
         with self.assertRaises(ValueError):
             self.clinica.modificar_turno(turno_id, nueva)
+
+    def test_modificar_turno_minuto_no_permitido(self):
+        fecha = datetime(2032, 12, 12, 10, 0)
+        nueva = datetime(2032, 12, 13, 10, 10)
+
+        self.clinica.agendar_turno("Mambo", 47111111, "MAT1", 1, fecha)
+        turno_id = self.clinica._turnos[0].get_id()
+
+        with self.assertRaises(ValueError):
+            self.clinica.modificar_turno(turno_id, nueva)
+
+    def test_modificar_turno_conflicto_por_intervalo(self):
+        self.clinica.registrar_consultorio(2, "Consultorio 2")
+        self.clinica.registrar_veterinario(12345678, "Otro", "01111111111", "MAT2", "General")
+
+        self.clinica.agendar_turno("Mambo", 47111111, "MAT1", 1, datetime(2032, 12, 12, 10, 0))
+        self.clinica.agendar_turno("Mambo", 47111111, "MAT2", 2, datetime(2032, 12, 12, 11, 0))
+
+        turno_a_modificar = self.clinica._turnos[1].get_id()
+
+        with self.assertRaises(ValueError):
+            # al mover a 10:15 se solapa con el turno existente de la misma mascota
+            self.clinica.modificar_turno(turno_a_modificar, datetime(2032, 12, 12, 10, 15))
+
+    def test_turnos_pegados_no_se_superponen(self):
+        self.clinica.registrar_dueno(47222222, "Juan", "01122222222", "Otra")
+        self.clinica.registrar_mascota("Luna", "Gato", 3, "Siames", 47222222)
+        self.clinica.registrar_veterinario(12345678, "Otro", "01111111111", "MAT2", "General")
+
+        # Primer turno: 10:30-11:00
+        self.clinica.agendar_turno("Mambo", 47111111, "MAT1", 1, datetime(2032, 12, 12, 10, 30))
+
+        # Segundo turno: 11:00-11:30 (empieza justo cuando termina el primero)
+        # Cambian veterinario, consultorio y mascota para que no haya otra restricción.
+        self.clinica.agendar_turno("Luna", 47222222, "MAT2", 1, datetime(2032, 12, 12, 11, 0))
+
+        self.assertEqual(2, len(self.clinica._turnos))
 
     # ❌ modificar inexistente
     def test_modificar_turno_inexistente(self):

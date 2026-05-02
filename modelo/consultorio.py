@@ -1,7 +1,5 @@
 class Consultorio:
-    """
-    Clase que representa un consultorio dentro de la clínica.
-    """
+    """Representa un consultorio dentro de la clínica."""
 
     def __init__(self, numero: int, descripcion: str):
         self._numero = numero
@@ -13,9 +11,9 @@ class Consultorio:
     def get_descripcion(self) -> str:
         return self._descripcion
 
-    def mostrar_info(self):
+    def mostrar_info(self) -> None:
         print(f" Número: {self._numero}")
         print(f"  Descripción: {self._descripcion}")
 
-    def set_descripcion(self, descripcion: str):
+    def set_descripcion(self, descripcion: str) -> None:
         self._descripcion = descripcion

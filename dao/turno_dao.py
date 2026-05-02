@@ -6,8 +6,10 @@ from modelo.turno import Turno
 
 
 class TurnoDAO:
+    """Persistencia de turnos en formato JSON."""
 
     def guardar(self, turnos, path):
+        """Guarda la colección de turnos en disco."""
         os.makedirs(os.path.dirname(path), exist_ok=True)
 
         data = []
@@ -27,6 +29,7 @@ class TurnoDAO:
             json.dump(data, f, indent=4)
 
     def cargar(self, path, clinica):
+        """Carga turnos desde disco y los reconstruye en la clínica."""
         with open(path, "r") as f:
             data = json.load(f)
 

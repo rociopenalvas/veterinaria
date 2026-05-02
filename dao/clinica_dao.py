@@ -6,6 +6,7 @@ from dao.turno_dao import TurnoDAO
 
 
 class ClinicaDAO:
+    """Fachada de persistencia para cargar y guardar toda la clínica."""
 
     def __init__(self):
         self.dueno_dao = DuenoDAO()
@@ -15,6 +16,7 @@ class ClinicaDAO:
         self.turno_dao = TurnoDAO()
 
     def guardar(self, clinica, base_path):
+        """Guarda todas las entidades de la clínica en JSON."""
         self.dueno_dao.guardar(clinica._duenos, base_path + "duenos.json")
         self.mascota_dao.guardar(clinica._mascotas, base_path + "mascotas.json")
         self.vet_dao.guardar(clinica._veterinarios, base_path + "veterinarios.json")
@@ -22,6 +24,7 @@ class ClinicaDAO:
         self.turno_dao.guardar(clinica._turnos, base_path + "turnos.json")
 
     def cargar(self, clinica, base_path):
+        """Carga todas las entidades de la clínica desde JSON."""
         self.dueno_dao.cargar(base_path + "duenos.json", clinica)
         self.mascota_dao.cargar(base_path + "mascotas.json", clinica)
         self.vet_dao.cargar(base_path + "veterinarios.json", clinica)

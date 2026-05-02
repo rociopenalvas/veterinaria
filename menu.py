@@ -1,15 +1,22 @@
 from datetime import datetime
+
 from dao.clinica_dao import ClinicaDAO
-from clinica import ClinicaVeterinaria
+
 
 def guardar_automatico(func):
+    """Guarda en JSON al finalizar una operación del menú."""
+
     def wrapper(self, *args, **kwargs):
         resultado = func(self, *args, **kwargs)
         self._guardar()
         return resultado
+
     return wrapper
 
+
 class Menu:
+    """Menú interactivo de consola para gestionar la clínica."""
+
     def __init__(self, clinica):
         self._clinica = clinica
         self._dao = ClinicaDAO()
@@ -91,7 +98,7 @@ class Menu:
     def _registrar_dueno(self):
         dni = self._pedir_entero("DNI: ")
         nombre = input("Nombre: ")
-        telefono = input("Teléfono (XXX XXXX-XXXX): ").strip()
+        telefono = input("Teléfono (11 dígitos, sin espacios): ").strip()
         direccion = input("Dirección: ")
 
         self._clinica.registrar_dueno(
@@ -106,7 +113,7 @@ class Menu:
     @guardar_automatico
     def _modificar_dueno(self):
         dni = self._pedir_entero("DNI: ")
-        telefono = input("Nuevo teléfono (XXX XXXX-XXXX): ").strip()
+        telefono = input("Nuevo teléfono (11 dígitos, sin espacios): ").strip()
         direccion = input("Nueva dirección: ")
 
         self._clinica.modificar_dueno(
@@ -160,7 +167,7 @@ class Menu:
     def _registrar_veterinario(self):
         dni = self._pedir_entero("DNI: ")
         nombre = input("Nombre: ")
-        telefono = input("Teléfono (XXX XXXX-XXXX): ").strip()
+        telefono = input("Teléfono (11 dígitos, sin espacios): ").strip()
         matricula = input("Matrícula: ")
         especialidad = input("Especialidad: ")
 
@@ -176,7 +183,7 @@ class Menu:
     @guardar_automatico
     def _modificar_veterinario(self):
         matricula = input("Matrícula: ")
-        telefono = input("Nuevo teléfono (XXX XXXX-XXXX): ").strip()
+        telefono = input("Nuevo teléfono (11 dígitos, sin espacios): ").strip()
         especialidad = input("Nueva especialidad: ")
 
         self._clinica.modificar_veterinario(
