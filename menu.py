@@ -4,9 +4,8 @@ from dao.clinica_dao import ClinicaDAO
 
 
 def guardar_automatico(func):
-    """Guarda en JSON al finalizar una operación del menú."""
-
     def wrapper(self, *args, **kwargs):
+        # Persiste después de acciones que modifican datos (decorador en cada método).
         resultado = func(self, *args, **kwargs)
         self._guardar()
         return resultado

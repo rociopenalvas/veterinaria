@@ -3,7 +3,6 @@ from modelo.dueno import Dueno
 
 
 class Mascota(Animal):
-    """Representa una mascota atendida por la clínica."""
 
     def __init__(self, especie: str, edad: int, nombre: str, raza: str, dueno: Dueno):
         super().__init__(especie, edad)

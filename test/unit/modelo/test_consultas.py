@@ -8,40 +8,29 @@ class TestConsultas(unittest.TestCase):
     def setUp(self):
         self.clinica = ClinicaVeterinaria("Test")
 
-        # Dueños
         self.clinica.registrar_dueno(47111111, "Soledad", "01136111111", "Calle")
         self.clinica.registrar_dueno(47222222, "Juan", "01122222222", "Otra")
 
-        # Mascotas
         self.clinica.registrar_mascota("Mambo", "Perro", 5, "Lab", 47111111)
         self.clinica.registrar_mascota("Luna", "Gato", 3, "Siames", 47222222)
 
-        # Veterinarios
         self.clinica.registrar_veterinario(87654321, "Dr1", "10987654321", "MAT1", "General")
         self.clinica.registrar_veterinario(12345678, "Dr2", "10123456789", "MAT2", "Cirugia")
 
-        # Consultorios
         self.clinica.registrar_consultorio(1, "C1")
         self.clinica.registrar_consultorio(2, "C2")
 
-        # Fechas
         self.fecha1 = datetime(2032, 12, 12, 10, 0)
         self.fecha2 = datetime(2032, 12, 13, 10, 0)
-        self.fecha3 = datetime(2032, 12, 12, 11, 0)  # misma fecha, otra hora
+        self.fecha3 = datetime(2032, 12, 12, 11, 0)
 
-        # Turnos (mezclados a propósito)
         self.clinica.agendar_turno("Mambo", 47111111, "MAT1", 1, self.fecha1)
         self.clinica.agendar_turno("Luna", 47222222, "MAT2", 2, self.fecha2)
         self.clinica.agendar_turno("Mambo", 47111111, "MAT2", 2, self.fecha3)
 
-    # =========================
-    # 📅 POR FECHA
-    # =========================
-
     def test_turnos_por_fecha_filtra_correcto(self):
         res = self.clinica.turnos_por_fecha(self.fecha1.date())
 
-        # Debe traer los dos turnos del mismo día (fecha1 y fecha3)
         self.assertEqual(2, len(res))
 
         nombres = [t.get_mascota().get_nombre() for t in res]
@@ -50,10 +39,6 @@ class TestConsultas(unittest.TestCase):
     def test_turnos_por_fecha_sin_resultados(self):
         res = self.clinica.turnos_por_fecha(date(2035, 1, 1))
         self.assertEqual(0, len(res))
-
-    # =========================
-    # 👨‍⚕️ POR VETERINARIO
-    # =========================
 
     def test_turnos_por_veterinario_filtra(self):
         res = self.clinica.turnos_por_veterinario("MAT2")
@@ -67,10 +52,6 @@ class TestConsultas(unittest.TestCase):
         res = self.clinica.turnos_por_veterinario("NO")
         self.assertEqual(0, len(res))
 
-    # =========================
-    # 🐶 POR MASCOTA
-    # =========================
-
     def test_turnos_por_mascota_filtra(self):
         res = self.clinica.turnos_por_mascota("Mambo", 47111111)
 
@@ -82,10 +63,6 @@ class TestConsultas(unittest.TestCase):
     def test_turnos_por_mascota_inexistente(self):
         res = self.clinica.turnos_por_mascota("NoExiste", 47111111)
         self.assertEqual(0, len(res))
-
-    # =========================
-    # 🧑‍🦱 POR DUEÑO
-    # =========================
 
     def test_turnos_por_dueno_filtra(self):
         res = self.clinica.turnos_por_dueno(47111111)
@@ -99,16 +76,10 @@ class TestConsultas(unittest.TestCase):
         res = self.clinica.turnos_por_dueno(99999999)
         self.assertEqual(0, len(res))
 
-    # =========================
-    # 🧪 ESTADO (IMPORTANTE)
-    # =========================
-
     def test_turnos_cancelados_no_aparecen(self):
-        # cancelar uno de Mambo
         turno_id = self.clinica._turnos[0].get_id()
         self.clinica.cancelar_turno(turno_id)
 
         res = self.clinica.turnos_por_dueno(47111111)
 
-        # antes eran 2 → ahora debe quedar 1
         self.assertEqual(1, len(res))

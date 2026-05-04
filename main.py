@@ -7,7 +7,8 @@ from menu import Menu
 
 def main():
     """Inicializa la app, carga datos, ejecuta menú y persiste cambios."""
-    clinica = ClinicaVeterinaria("VVeterinariaaa")
+
+    clinica = ClinicaVeterinaria("Veterinaria Reneé 81")
     dao = ClinicaDAO()
 
     try:

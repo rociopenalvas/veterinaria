@@ -2,7 +2,6 @@ from modelo.persona import Persona
 
 
 class Veterinario(Persona):
-    """Representa a un veterinario de la clínica."""
 
     def __init__(self, dni: int, nombre: str, telefono: str, matricula: str, especialidad: str):
         super().__init__(dni, nombre, telefono)

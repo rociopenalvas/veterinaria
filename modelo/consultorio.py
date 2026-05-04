@@ -1,5 +1,4 @@
 class Consultorio:
-    """Representa un consultorio dentro de la clínica."""
 
     def __init__(self, numero: int, descripcion: str):
         self._numero = numero

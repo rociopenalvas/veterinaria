@@ -12,10 +12,8 @@ class TestConsultorioDAO(unittest.TestCase):
 
         dao = ConsultorioDAO()
 
-        # guardar
         dao.guardar(clinica._consultorios, "test_data/consultorios.json")
 
-        # cargar
         nueva = ClinicaVeterinaria("Nueva")
         dao.cargar("test_data/consultorios.json", nueva)
 
@@ -25,5 +23,3 @@ class TestConsultorioDAO(unittest.TestCase):
 
         self.assertEqual(1, c.get_numero())
         self.assertEqual("Consultorio 1", c.get_descripcion())
-
-

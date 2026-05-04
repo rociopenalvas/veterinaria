@@ -5,15 +5,13 @@ from modelo.mascota import Mascota
 from modelo.veterinario import Veterinario
 from modelo.consultorio import Consultorio
 
+
 class Turno:
     """
-    Representa un turno veterinario.
-    Conecta mascota, veterinario y consultorio con fecha/hora.
+    Conecta una mascota, un veterinario y un consultorio con una fecha/hora.
     Cada turno ocupa un bloque fijo desde esa hora (ver DURACION_MINUTOS).
     """
     DURACION_MINUTOS = 30
-
-    # Contador para asignar IDs únicos.
     _contador_id = 1
 
     def __init__(
@@ -53,7 +51,7 @@ class Turno:
 
     @classmethod
     def sincronizar_contador_tras_carga(cls, turnos: list) -> None:
-        """Evita colisiones de id al crear turnos nuevos después de cargar desde disco."""
+        # Sin esto, al cargar JSON los ids nuevos podrían repetir los viejos.
         if turnos:
             cls._contador_id = max(t.get_id() for t in turnos) + 1
 
@@ -67,7 +65,6 @@ class Turno:
         return self._fecha_hora
 
     def get_fecha_fin(self) -> datetime:
-        """Fin del bloque del turno (inicio + DURACION_MINUTOS)."""
         return self._fecha_hora + timedelta(minutes=self.DURACION_MINUTOS)
 
     def get_consultorio(self) -> Consultorio:
@@ -79,14 +76,12 @@ class Turno:
     def get_id(self) -> int:
         return self._id
 
-    # Métodos principales
     def cancelar(self) -> None:
         self._estado = "Cancelado"
 
     def modificar_fecha(self, nueva_fecha_hora: datetime):
         """
-        Modifica la fecha y hora del turno.
-        Verifica que sea futuro.
+        Modifica la fecha y hora, verificando que sea futura y que sea un bloque válido.
         """
         if nueva_fecha_hora <= datetime.now():
             raise ValueError("La nueva fecha debe ser futura.")

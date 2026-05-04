@@ -2,6 +2,7 @@ import unittest
 from clinica import ClinicaVeterinaria
 from dao.dueno_dao import DuenoDAO
 
+
 class TestDuenoDAO(unittest.TestCase):
     def test_guardar_y_cargar_duenos(self):
         clinica = ClinicaVeterinaria("Test")

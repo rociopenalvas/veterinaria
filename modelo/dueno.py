@@ -2,7 +2,6 @@ from modelo.persona import Persona
 
 
 class Dueno(Persona):
-    """Representa al dueño de una o más mascotas."""
 
     def __init__(self, dni: int, nombre: str, telefono: str, direccion: str):
         super().__init__(dni, nombre, telefono)

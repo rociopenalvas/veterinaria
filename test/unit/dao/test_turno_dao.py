@@ -14,7 +14,6 @@ class TestTurnoDAO(unittest.TestCase):
     def test_guardar_y_cargar_turnos(self):
         clinica = ClinicaVeterinaria("Test")
 
-        # base completa
         clinica.registrar_dueno(47111111, "Soledad", "01136111111", "Calle")
         clinica.registrar_mascota("Mambo", "Perro", 5, "Lab", 47111111)
         clinica.registrar_veterinario(87654321, "Dr", "10987654321", "MAT1", "General")
@@ -25,7 +24,6 @@ class TestTurnoDAO(unittest.TestCase):
         clinica.agendar_turno("Mambo", 47111111, "MAT1", 1, fecha)
         id_antes = clinica._turnos[0].get_id()
 
-        # DAO
         dao_dueno = DuenoDAO()
         dao_mascota = MascotaDAO()
         dao_vet = VeterinarioDAO()
@@ -34,16 +32,15 @@ class TestTurnoDAO(unittest.TestCase):
 
         os.makedirs("test_data", exist_ok=True)
 
-        # guardar
         dao_dueno.guardar(clinica._duenos, "test_data/duenos.json")
         dao_mascota.guardar(clinica._mascotas, "test_data/mascotas.json")
         dao_vet.guardar(clinica._veterinarios, "test_data/veterinarios.json")
         dao_cons.guardar(clinica._consultorios, "test_data/consultorios.json")
         dao_turno.guardar(clinica._turnos, "test_data/turnos.json")
 
-        # cargar
         nueva = ClinicaVeterinaria("Nueva")
 
+        # Mismo orden que en la app real: entidades antes que turnos.
         dao_dueno.cargar("test_data/duenos.json", nueva)
         dao_mascota.cargar("test_data/mascotas.json", nueva)
         dao_vet.cargar("test_data/veterinarios.json", nueva)

@@ -17,5 +17,3 @@ class TestClinicaDAO(unittest.TestCase):
         dao.cargar(nueva, "test_data/")
 
         self.assertEqual(len(clinica._duenos), len(nueva._duenos))
-
-

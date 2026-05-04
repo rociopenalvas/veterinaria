@@ -2,7 +2,6 @@ from abc import ABC, abstractmethod
 
 
 class Persona(ABC):
-    """Clase base abstracta para personas del sistema."""
 
     def __init__(self, dni: int, nombre: str, telefono: str):
         self._dni = dni
@@ -21,3 +20,4 @@ class Persona(ABC):
     @abstractmethod
     def mostrar_info(self) -> None:
         """Muestra información de la persona en consola."""
+        pass
