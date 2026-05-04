@@ -225,8 +225,11 @@ F) PRINCIPIOS SOLID (RESUMEN DE LA CHEAT SHEET)
   • SRP – Responsabilidad única
     APLICA en lo básico: modelo describe entidades; ClinicaVeterinaria concentra
     reglas de negocio; DAO solo serializa; Menu solo interfaz. Aun así, Clinica
-    es grande (muchas responsabilidades relacionadas); en un sistema mayor se
-    podría partir en servicios.
+    es grande (muchas responsabilidades relacionadas) y en un sistema mayor se
+    podría partir en servicios. para el alcance y tamaño del trabajo práctico, 
+    reunir varias responsabilidades en una clase simplifica el desarrollo y 
+    facilita la gestión del código. En proyectos pequeños, la prioridad es la 
+    claridad y el cumplimiento de la consigna. DESARROLLAR
 
   • OCP – Abierto/cerrado
     PARCIAL. Agregar una nueva entidad similar implicaría tocar menú y clínica;
