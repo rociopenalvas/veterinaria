@@ -264,7 +264,7 @@ class Menu:
         self._clinica.eliminar_consultorio(numero)
 
         print("Consultorio eliminado.")
-        
+
     def _menu_mascotas(self):
         while True:
             print("\n--- MASCOTAS ---")
@@ -296,7 +296,7 @@ class Menu:
                     print("Opción inválida.")
 
             except ValueError as e:
-                print("Error:", e) 
+                print("Error:", e)
 
     @guardar_automatico
     def _registrar_mascota(self):
@@ -387,8 +387,8 @@ class Menu:
             return fecha
 
         except ValueError:
-            raise ValueError("Formato de fecha inválido.") 
-    
+            raise ValueError("Formato de fecha inválido.")
+
     @guardar_automatico
     def _agendar_turno(self):
         nombre = input("Nombre mascota: ")
@@ -414,15 +414,15 @@ class Menu:
 
     @guardar_automatico
     def _modificar_turno(self):
-            id_turno = int(input("ID del turno: "))
-            nueva_fecha = self._pedir_fecha_hora()
+        id_turno = int(input("ID del turno: "))
+        nueva_fecha = self._pedir_fecha_hora()
 
-            self._clinica.modificar_turno(
-                id_turno,
-                nueva_fecha
-            )
+        self._clinica.modificar_turno(
+            id_turno,
+            nueva_fecha
+        )
 
-            print("Turno modificado.")
+        print("Turno modificado.")
 
     @guardar_automatico
     def _cancelar_turno(self):
@@ -463,8 +463,8 @@ class Menu:
                     print("Opción inválida.")
 
             except ValueError as e:
-                print("Error:", e) 
-            
+                print("Error:", e)
+
     def _consulta_por_fecha(self):
         texto = input("Ingrese fecha (YYYY-MM-DD): ")
 

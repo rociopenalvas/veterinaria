@@ -8,7 +8,7 @@ class ConsultorioDAO:
 
         # Crea el directorio si no existe.
         os.makedirs(os.path.dirname(path), exist_ok=True)
-        
+
         data = []
 
         for c in consultorios:

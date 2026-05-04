@@ -49,7 +49,9 @@ class TestConsultorio(unittest.TestCase):
     def test_eliminar_consultorio_con_turno(self):
         self.clinica.registrar_dueno(47111111, "Soledad", "01136111111", "Calle")
         self.clinica.registrar_mascota("Mambo", "Perro", 5, "Lab", 47111111)
-        self.clinica.registrar_veterinario(87654321, "Dr", "10987654321", "MAT1", "General")
+        self.clinica.registrar_veterinario(
+            87654321, "Dr", "10987654321", "MAT1", "General"
+        )
         self.clinica.registrar_consultorio(1, "Consultorio 1")
 
         fecha = datetime(2030, 5, 10, 10, 0)
@@ -61,7 +63,9 @@ class TestConsultorio(unittest.TestCase):
     def test_eliminar_consultorio_con_turno_cancelado(self):
         self.clinica.registrar_dueno(47111111, "Soledad", "01136111111", "Calle")
         self.clinica.registrar_mascota("Mambo", "Perro", 5, "Lab", 47111111)
-        self.clinica.registrar_veterinario(87654321, "Dr", "10987654321", "MAT1", "General")
+        self.clinica.registrar_veterinario(
+            87654321, "Dr", "10987654321", "MAT1", "General"
+        )
         self.clinica.registrar_consultorio(1, "Consultorio 1")
 
         fecha = datetime(2030, 5, 10, 10, 0)
@@ -75,7 +79,9 @@ class TestConsultorio(unittest.TestCase):
     def test_eliminar_consultorio_con_turno_activo_pasado(self):
         self.clinica.registrar_dueno(47111111, "Soledad", "01136111111", "Calle")
         self.clinica.registrar_mascota("Mambo", "Perro", 5, "Lab", 47111111)
-        self.clinica.registrar_veterinario(87654321, "Dr", "10987654321", "MAT1", "General")
+        self.clinica.registrar_veterinario(
+            87654321, "Dr", "10987654321", "MAT1", "General"
+        )
         self.clinica.registrar_consultorio(1, "Consultorio 1")
 
         self.clinica.restaurar_turno(

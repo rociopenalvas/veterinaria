@@ -94,7 +94,8 @@ class ClinicaVeterinaria:
             inicio_existente = t.get_fecha_hora()
             fin_existente = t.get_fecha_fin()
 
-            # Dos turnos se superponen si el inicio de uno ocurre antes del final del otro y viceversa.
+            # Dos turnos se superponen si el inicio de uno es antes del fin del otro
+            # y al revés (intervalos [inicio, fin)).
             se_superpone = inicio_nuevo < fin_existente and inicio_existente < fin_nuevo
 
             if not se_superpone:
@@ -116,7 +117,9 @@ class ClinicaVeterinaria:
                 raise ValueError("La mascota ya tiene turno en ese horario.")
 
     def _turno_activo_futuro(self, turno: Turno) -> bool:
-        return turno.get_estado() == "Activo" and turno.get_fecha_hora() >= datetime.now()
+        activo = turno.get_estado() == "Activo"
+        futuro = turno.get_fecha_hora() >= datetime.now()
+        return activo and futuro
 
     def agendar_turno(
         self,
@@ -299,7 +302,8 @@ class ClinicaVeterinaria:
 
     def _buscar_mascota(self, nombre: str, dni_dueno: int) -> Mascota:
         for mascota in self._mascotas:
-            if mascota.get_nombre() == nombre and mascota.get_dueno().get_dni() == dni_dueno:
+            dn = mascota.get_dueno().get_dni()
+            if mascota.get_nombre() == nombre and dn == dni_dueno:
                 return mascota
         return None
 
@@ -330,9 +334,6 @@ class ClinicaVeterinaria:
     def cancelar_turno(self, id_turno: int) -> None:
         turno = self._buscar_turno_por_id(id_turno)
 
-        if turno is None:
-            raise ValueError("El turno no existe.")
-
         if turno.get_estado() == "Cancelado":
             raise ValueError("El turno ya estaba cancelado.")
 
@@ -341,9 +342,6 @@ class ClinicaVeterinaria:
     def modificar_turno(self, id_turno: int, nueva_fecha) -> None:
         """Modifica la fecha de un turno existente."""
         turno = self._buscar_turno_por_id(id_turno)
-
-        if turno is None:
-            raise ValueError("El turno no existe.")
 
         self._hay_problema(turno, nueva_fecha)
 
@@ -394,7 +392,9 @@ class ClinicaVeterinaria:
 
         for mascota in self._mascotas:
             if mascota.get_dueno() == dueno:
-                raise ValueError("No se puede eliminar dueño porque tiene mascotas asociadas.")
+                raise ValueError(
+                    "No se puede eliminar dueño porque tiene mascotas asociadas."
+                )
 
         self._duenos.remove(dueno)
 
@@ -437,7 +437,8 @@ class ClinicaVeterinaria:
             raise ValueError("El veterinario no existe.")
 
         for turno in self._turnos:
-            if turno.get_veterinario() == veterinario and self._turno_activo_futuro(turno):
+            mismo_vet = turno.get_veterinario() == veterinario
+            if mismo_vet and self._turno_activo_futuro(turno):
                 raise ValueError(
                     "No se puede eliminar porque tiene turnos "
                     "activos futuros asociados."
@@ -495,7 +496,8 @@ class ClinicaVeterinaria:
             raise ValueError("El consultorio no existe.")
 
         for turno in self._turnos:
-            if turno.get_consultorio() == consultorio and self._turno_activo_futuro(turno):
+            mismo_cons = turno.get_consultorio() == consultorio
+            if mismo_cons and self._turno_activo_futuro(turno):
                 raise ValueError(
                     "No se puede eliminar el consultorio porque tiene "
                     "turnos activos futuros asociados."

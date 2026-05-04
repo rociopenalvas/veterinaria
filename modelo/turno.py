@@ -90,8 +90,16 @@ class Turno:
 
     def mostrar_info(self) -> None:
         print(f"  Mascota: {self._mascota.get_nombre()}")
-        print(f"  Dueño: {self._mascota.get_dueno().get_nombre()} DNI: {self._mascota.get_dueno().get_dni()}")
-        print(f"  Veterinario: {self._veterinario.get_nombre()} Matrícula: {self._veterinario.get_matricula()}")
-        print(f"  Inicio: {self._fecha_hora}  Fin estimado: {self.get_fecha_fin()}")
+        dueno = self._mascota.get_dueno()
+        print(
+            f"  Dueño: {dueno.get_nombre()} DNI: {dueno.get_dni()}"
+        )
+        nom_veterinario = self._veterinario.get_nombre()
+        matricula = self._veterinario.get_matricula()
+        print(f"  Veterinario: {nom_veterinario} Matrícula: {matricula}")
+        print(
+            f"  Inicio: {self._fecha_hora}  "
+            f"Fin estimado: {self.get_fecha_fin()}"
+        )
         print(f"  Consultorio: {self._consultorio.get_numero()}")
         print(f"  Estado: {self._estado}")

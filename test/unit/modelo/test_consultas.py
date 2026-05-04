@@ -14,8 +14,12 @@ class TestConsultas(unittest.TestCase):
         self.clinica.registrar_mascota("Mambo", "Perro", 5, "Lab", 47111111)
         self.clinica.registrar_mascota("Luna", "Gato", 3, "Siames", 47222222)
 
-        self.clinica.registrar_veterinario(87654321, "Dr1", "10987654321", "MAT1", "General")
-        self.clinica.registrar_veterinario(12345678, "Dr2", "10123456789", "MAT2", "Cirugia")
+        self.clinica.registrar_veterinario(
+            87654321, "Dr1", "10987654321", "MAT1", "General"
+        )
+        self.clinica.registrar_veterinario(
+            12345678, "Dr2", "10123456789", "MAT2", "Cirugia"
+        )
 
         self.clinica.registrar_consultorio(1, "C1")
         self.clinica.registrar_consultorio(2, "C2")

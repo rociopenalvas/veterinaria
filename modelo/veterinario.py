@@ -3,7 +3,14 @@ from modelo.persona import Persona
 
 class Veterinario(Persona):
 
-    def __init__(self, dni: int, nombre: str, telefono: str, matricula: str, especialidad: str):
+    def __init__(
+        self,
+        dni: int,
+        nombre: str,
+        telefono: str,
+        matricula: str,
+        especialidad: str,
+    ):
         super().__init__(dni, nombre, telefono)
         self._matricula = matricula
         self._especialidad = especialidad
