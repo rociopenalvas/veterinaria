@@ -1,0 +1,623 @@
+================================================================================
+  INFORME DETALLADO DE DESARROLLO
+  Sistema de Gestión de Turnos – Clínica Veterinaria
+  Trabajo práctico / recuperatorio – Programación Orientada a Objetos (Python)
+  Modalidad individual – Secundario / técnico
+================================================================================
+
+Este documento describe de forma exhaustiva el proceso de desarrollo, las
+decisiones de diseño, la organización del código, el funcionamiento técnico del
+sistema y la forma en que cada requisito de la consigna fue abordado. Está
+redactado para sustentar la defensa oral y para acompañar la entrega de UML e
+implementación.
+
+
+--------------------------------------------------------------------------------
+ÍNDICE
+--------------------------------------------------------------------------------
+  1. Marco del trabajo y consigna
+  2. Enfoque de desarrollo (cómo se encaró el proyecto en el tiempo)
+  3. Visión general de la arquitectura y decisiones de diseño
+  4. Estructura de carpetas y responsabilidad de cada módulo
+  5. Modelo del dominio (clases del paquete modelo/)
+  6. Capa de lógica: ClinicaVeterinaria
+  7. Capa de persistencia: patrón DAO y archivos JSON
+  8. Interfaz de usuario: Menu y punto de entrada main
+  9. Funcionalidades pedidas: trazabilidad consigna → código
+ 10. Validaciones, reglas de negocio y manejo de errores
+ 11. Pruebas automatizadas
+ 12. Relación con los conceptos de la materia (cheat sheet de POO)
+ 13. Criterios de evaluación de la consigna (cómo los cubre el trabajo)
+ 14. Limitaciones conocidas y posibles extensiones
+ 15. Cierre
+
+
+--------------------------------------------------------------------------------
+1. MARCO DEL TRABAJO Y CONSIGNA
+--------------------------------------------------------------------------------
+
+La consigna (Penalva – Propuesta Previa / Recuperatorio POO) pide desarrollar un
+Sistema de Gestión de Turnos para una Clínica Veterinaria en Python, de manera
+individual, articulando UML, principios de POO y una aplicación funcional.
+
+Elementos del dominio explícitos en el enunciado:
+  - Pacientes (en el sistema se modelan como mascotas, con dueños).
+  - Veterinarios.
+  - Turnos.
+  - Consultorios.
+
+Funcionalidades esperadas según el enunciado:
+  - Registrar mascotas y sus dueños.
+  - Registrar veterinarios y su especialidad.
+  - Agendar, modificar y cancelar turnos.
+  - Consultar reportes de turnos por día, mascota o veterinario.
+  - Validar fechas y horarios disponibles.
+
+Entregas previstas en la consigna:
+  Entrega 1 – Análisis y modelado UML:
+    - Diagrama de clases: mínimo 6 clases, con herencia.
+    - Diagrama de casos de uso de las principales interacciones.
+    - Diagrama de secuencia para el caso “agendar turno”.
+  Entrega 2 – Implementación en Python:
+    - Clases con atributos y métodos adecuados.
+    - Herencia (ejemplo sugerido: Persona → Veterinario / Dueño).
+    - Encapsulamiento (atributos privados/protegidos y acceso controlado).
+    - Validación de datos (fechas futuras, superposición de turnos).
+    - Comentarios y PEP 8.
+  Entrega 3 – Aplicación interactiva y pruebas:
+    - Menú con CRUD por entidad.
+    - Consultas dinámicas (fecha, veterinario, mascota).
+    - Persistencia en JSON o CSV.
+    - Pruebas simples del comportamiento.
+
+Este informe describe la implementación real del proyecto en el repositorio,
+alineada con esas entregas.
+
+
+--------------------------------------------------------------------------------
+2. ENFOQUE DE DESARROLLO (CÓMO SE ENCARÓ EL PROYECTO EN EL TIEMPO)
+--------------------------------------------------------------------------------
+
+Aunque la consigna presenta tres entregas formales, en la práctica el desarrollo
+siguió un orden incremental coherente con construir primero lo que otros módulos
+van a necesitar:
+
+  Fase A – Modelo de dominio
+    Se definieron las entidades “del mundo real” como clases: qué datos guardan
+    y qué comportamiento mínimo tienen (por ejemplo mostrar información por
+    consola). Aquí se aplicó herencia donde tenía sentido (Persona/Animal
+    abstractos) para no duplicar código entre Dueño y Veterinario, y entre
+    futuras variantes de Animal (solo se usa Mascota).
+
+  Fase B – Reglas de negocio centralizadas
+    Se implementó ClinicaVeterinaria como “cerebro” del sistema: listas de
+    objetos y métodos que registran, buscan, validan y relacionan entidades.
+    Esta decisión evita que el menú o los archivos JSON contengan lógica de
+    negocio; así se cumple mejor la separación conceptual entre interfaz,
+    dominio y persistencia.
+
+  Fase C – Persistencia
+    Se agregaron clases DAO que traducen listas de objetos a texto JSON y
+    viceversa, más una ClinicaDAO que orquesta el guardado/cargado completo.
+
+  Fase D – Interfaz y cierre
+    Se implementó el menú por consola, el bucle principal, la lectura de datos
+    del usuario y el guardado automático tras operaciones que modifican datos.
+    Finalmente se escribieron pruebas unitarias e integración.
+
+Este orden no es “cascada pura” (no se dejó todo el código para el final), pero
+sí respeta dependencias: los turnos necesitan mascotas, veterinarios y
+consultorios ya existentes; el DAO de turnos necesita poder reconstruir objetos
+enlazados, etc.
+
+
+--------------------------------------------------------------------------------
+3. VISIÓN GENERAL DE LA ARQUITECTURA Y DECISIONES DE DISEÑO
+--------------------------------------------------------------------------------
+
+3.1 Tres capas principales
+
+  (1) Presentación / interfaz
+      Archivo menu.py, clase Menu. Solo imprime opciones, lee strings y números,
+      convierte formatos de fecha cuando hace falta y delega en la clínica.
+      Opcionalmente dispara el guardado en disco vía DAO.
+
+  (2) Dominio / aplicación
+      Archivo clinica.py, clase ClinicaVeterinaria. Mantiene el estado del
+      sistema (listas de dueños, mascotas, veterinarios, consultorios, turnos)
+      y todas las reglas que deben cumplirse para que los datos sean válidos.
+
+  (3) Infraestructura / persistencia
+      Paquete dao/. Cada *DAO sabe leer y escribir un tipo de lista en un archivo
+      JSON. ClinicaDAO agrupa las operaciones para no repetir rutas y orden
+      desde main o desde el menú.
+
+3.2 Por qué una sola clase “ClinicaVeterinaria” grande
+
+  En un sistema empresarial grande convendría partir servicios (TurnoService,
+  PersonaRepository, etc.). Para el alcance de un TP secundario, una clase
+  aplicación que concentra la lógica tiene ventajas pedagógicas y prácticas:
+  - Un solo lugar donde buscar validaciones y reglas.
+  - Menos archivos y menos “ceremonia” para quien está aprendiendo.
+  - Los tests pueden apuntar a ClinicaVeterinaria sin montar muchos stubs.
+
+  La contrapartida es que la clase crece en cantidad de métodos; se mitiga
+  agrupando mentalmente por entidad (dueños, mascotas, turnos, etc.) y usando
+  métodos privados auxiliares (_verificar_superposicion_turno, _buscar_*, etc.).
+
+3.3 Por qué patrón DAO y no guardar JSON desde la clínica
+
+  El patrón DAO (Data Access Object) separa “cómo se guardan los datos en disco”
+  de “qué significan esos datos en el negocio”. Beneficios en este proyecto:
+  - Si mañana se cambia JSON por CSV o una base SQLite, lo ideal es tocar solo
+    los DAO, no las reglas de solapamiento de turnos.
+  - Los métodos de clinica no necesitan importar json ni conocer las claves
+    exactas del archivo.
+  - Facilita pruebas: se puede guardar y cargar en carpetas temporarias.
+
+3.4 Por qué herencia con clases abstractas (ABC)
+
+  La consigna pide herencia Persona → Dueño / Veterinario. Se implementó
+  Persona como ABC (Abstract Base Class) con método abstracto mostrar_info.
+  Razones:
+  - Dueño y Veterinario comparten DNI, nombre, teléfono y getters; no tiene
+    sentido instanciar una “Persona genérica” sin saber si es dueño o veterinario.
+  - Animal → Mascota sigue la misma idea: hay datos comunes de animal y un
+    contrato mostrar_info; solo existe Mascota como subtipo concreto en el TP.
+
+  Esto conecta directamente con el concepto de abstracción de la materia: la
+  superclase define la interfaz mínima y datos comunes; las subclases concretizan.
+
+3.5 Encapsulamiento en Python
+
+  Python no tiene atributos privados estrictos como otros lenguajes. Se usa la
+  convención de prefijo "_" en atributos “internos” y se exponen valores con
+  getters (get_dni, get_nombre, …) y setters solo donde la clínica debe mutar
+  estado controlado (set_edad en Mascota, set_telefono en Dueño, etc.). Las
+  validaciones fuertes ocurren al registrar o modificar desde ClinicaVeterinaria,
+  no desde el menú.
+
+3.6 Identidad de turnos y estado
+
+  Cada Turno tiene un id numérico autoincremental gestionado por un contador de
+  clase (_contador_id). Sirve para modificar o cancelar desde el menú sin
+  reescribir toda la lista. El estado es un string (“Activo” o “Cancelado”):
+  es simple, legible en JSON y suficiente para excluir turnos cancelados de las
+  consultas tipo “reporte” y de la detección de solapes.
+
+3.7 Duración fija y “bloques” de 15 minutos
+
+  La consigna habla de validar horarios disponibles. El sistema fija la duración
+  de cada consulta en 30 minutos (constante DURACION_MINUTOS en Turno) y exige
+  que el minuto de inicio sea 0, 15, 30 o 45 y los segundos 0. Decisiones:
+  - Duración fija simplifica el cálculo de fin de turno y el solapamiento.
+  - Bloques alineados a cuartos de hora imitan agendas clínicas y reducen
+    errores de entrada (no hay turnos que empiecen a las 10:07).
+  - La condición de solape usa intervalos semiabiertos [inicio, fin): dos turnos
+    que uno termina exactamente cuando el otro empieza NO se consideran
+    superpuestos (el veterinario puede atender de corrido sin traslape).
+
+
+--------------------------------------------------------------------------------
+4. ESTRUCTURA DE CARPETAS Y RESPONSABILIDAD DE CADA MÓDULO
+--------------------------------------------------------------------------------
+
+  main.py
+    Punto de entrada. Crea ClinicaVeterinaria con un nombre, instancia
+    ClinicaDAO, intenta cargar desde data/, abre Menu.ejecutar() y al salir
+    guarda de nuevo. Captura excepciones de carga (archivo ausente, JSON
+    inválido, datos inconsistentes).
+
+  clinica.py
+    Clase ClinicaVeterinaria: estado en memoria + reglas de negocio.
+
+  menu.py
+    Clase Menu: interfaz de consola, decorador guardar_automatico para persistir
+    tras operaciones que alteran datos.
+
+  modelo/
+    persona.py    → Persona (ABC)
+    dueno.py      → Dueno(Persona)
+    veterinario.py → Veterinario(Persona)
+    animal.py     → Animal (ABC)
+    mascota.py    → Mascota(Animal)
+    consultorio.py → Consultorio
+    turno.py      → Turno
+
+  dao/
+    dueno_dao.py, mascota_dao.py, veterinario_dao.py, consultorio_dao.py,
+    turno_dao.py  → persistencia por entidad
+    clinica_dao.py → guardar/cargar todo en orden
+
+  data/
+    Archivos generados en ejecución: duenos.json, mascotas.json, etc.
+
+  test/
+    Pruebas unitarias por modelo y por DAO, más test de integración
+    test_clinica_dao.py para guardar/cargar.
+
+
+--------------------------------------------------------------------------------
+5. MODELO DEL DOMINIO (CLASES DEL PAQUETE modelo/)
+--------------------------------------------------------------------------------
+
+5.1 Persona (abstracta)
+
+  Atributos: _dni, _nombre, _telefono (comunes a dueños y veterinarios).
+  Métodos: getters para lectura; mostrar_info abstracto (cada subclase define
+  cómo se imprime).
+
+5.2 Dueno(Persona)
+
+  Agrega _direccion. Implementa mostrar_info con todos los campos.
+  set_telefono y set_direccion permiten actualización desde la clínica luego de
+  validar en modificar_dueno.
+
+5.3 Veterinario(Persona)
+
+  Agrega _matricula y _especialidad. La matrícula actúa como identificador
+  de negocio único para buscar al profesional al agendar o consultar.
+  set_telefono y set_especialidad para modificaciones validadas.
+
+5.4 Animal (abstracta)
+
+  Atributos: _especie, _edad. mostrar_info abstracto.
+
+5.5 Mascota(Animal)
+
+  Atributos adicionales: _nombre, _raza, referencia _dueno al objeto Dueno.
+  La unicidad “nombre + DNI del dueño” se valida en ClinicaVeterinaria al
+  registrar, no dentro de Mascota, para tener visión de todas las mascotas.
+
+5.6 Consultorio
+
+  _numero (identificador de negocio) y _descripcion. set_descripcion para
+  modificación sin cambiar el número de sala.
+
+5.7 Turno
+
+  Atributos: referencias a Mascota, Veterinario, Consultorio; _fecha_hora;
+  _estado; _id.
+  DURACION_MINUTOS = 30 a nivel de clase.
+  Contador de clase _contador_id para ids nuevos.
+
+  Comportamiento clave:
+    - __init__ llama _validar_bloque_horario; si validar_fecha_futura es True,
+      exige fecha estrictamente posterior a datetime.now() (turnos “nuevos”).
+    - Parámetros opcionales id_existente, estado y validar_fecha_futura permiten
+      reconstruir turnos desde archivo sin rechazar fechas pasadas.
+    - get_fecha_fin devuelve inicio + 30 minutos; se usa en solapes.
+    - cancelar pone estado “Cancelado”.
+    - modificar_fecha valida bloque, futuro y actualiza _fecha_hora.
+    - sincronizar_contador_tras_carga(turnos) ajusta _contador_id al máximo id
+      existente + 1 para no repetir ids al crear turnos después de cargar JSON.
+
+  mostrar_info imprime datos del turno incluyendo mascota, dueño, veterinario,
+  horario y consultorio: es la pieza reutilizada en listados y consultas.
+
+
+--------------------------------------------------------------------------------
+6. CAPA DE LÓGICA: ClinicaVeterinaria
+--------------------------------------------------------------------------------
+
+La clínica mantiene cinco listas: _duenos, _mascotas, _veterinarios,
+_consultorios, _turnos. Los métodos públicos siguen la idea CRUD donde aplica.
+
+6.1 Registro de entidades base
+
+  registrar_dueno: valida DNI ocho dígitos, nombre no vacío ni “solo dígitos”,
+  teléfono 11 caracteres numéricos, dirección no vacía, DNI no duplicado.
+  Crea Dueno y lo agrega a _duenos.
+
+  registrar_mascota: valida nombre, especie, raza, edad >= 0, DNI de dueño;
+  exige que el dueño exista; evita duplicar mismo nombre para el mismo dueño.
+  Crea Mascota(especie, edad, nombre, raza, dueno) y agrega a _mascotas.
+
+  registrar_veterinario: mismas ideas de DNI/nombre/teléfono; matrícula y
+  especialidad no vacías; matrícula única.
+
+  registrar_consultorio: número positivo, descripción no vacía, número único.
+
+6.2 Búsquedas auxiliares (métodos “privados” por convención)
+
+  _buscar_dueno_por_dni, _buscar_mascota(nombre, dni_dueno),
+  _buscar_veterinario_por_matricula, _buscar_consultorio_por_numero,
+  _buscar_turno_por_id recorren listas. Son O(n), aceptable para el tamaño de
+  datos de un TP; en producción se usarían índices o bases de datos.
+
+6.3 Turnos: agendar, restaurar, modificar, cancelar
+
+  agendar_turno:
+    Resuelve dueño, mascota, veterinario y consultorio por los datos ingresados;
+    si alguno no existe, ValueError con mensaje claro.
+    Crea Turno(..., validar_fecha_futura=True por defecto).
+    Llama _verificar_superposicion_turno(turno) para detectar solape con otros turnos Activos
+    compartiendo veterinario, consultorio o mascota.
+    Agrega a _turnos.
+
+  restaurar_turno:
+    Misma resolución de entidades que agendar, pero recibe id_turno y estado
+    desde JSON. Crea Turno con id_existente, estado y validar_fecha_futura=False.
+    Vuelve a ejecutar _verificar_superposicion_turno para asegurar que los datos
+    en archivo no
+    representan un conflicto imposible (dos activos solapados).
+    Si el estado en JSON no es “Activo” ni “Cancelado”, se fuerza “Activo” como
+    valor seguro por defecto.
+
+  modificar_turno(id, nueva_fecha):
+    Obtiene el turno, llama _verificar_superposicion_turno(turno, nueva_fecha)
+    ANTES de aplicar
+    el cambio (evalúa solapes como si el turno ya estuviera en la nueva franja).
+    Luego turno.modificar_fecha(nueva_fecha) (que exige futuro y bloque válido).
+
+  cancelar_turno(id):
+    Busca por id; si ya estaba cancelado, error; si no, turno.cancelar().
+
+6.4 Solapamientos: _verificar_superposicion_turno
+
+  Solo compara contra turnos con estado “Activo”. Ignora el mismo id (útil al
+  modificar). Calcula fin con timedelta(minutes=Turno.DURACION_MINUTOS).
+  Condición de solape estándar de intervalos [inicio, fin):
+    inicio_nuevo < fin_existente and inicio_existente < fin_nuevo
+  Si hay solape y coincide veterinario, consultorio o mascota, levanta ValueError
+  con mensaje específico.
+
+6.5 Eliminaciones con integridad referencial “lógica”
+
+  eliminar_dueno: no permite si el dueño tiene mascotas.
+
+  eliminar_mascota / eliminar_veterinario / eliminar_consultorio:
+    No permiten borrar si existe algún turno Activo cuya fecha/hora es futura
+    (>= ahora) vinculado a esa entidad. Se usa _turno_activo_futuro.
+    Nota: turnos pasados o cancelados no bloquean la eliminación; es una decisión
+    de negocio razonable para no “congelar” el maestro de veterinarios por
+    historia antigua.
+
+6.6 Modificaciones
+
+  modificar_dueno, modificar_mascota (edad), modificar_veterinario,
+  modificar_consultorio (descripción) validan existencia y campos nuevos.
+
+6.7 Listados
+
+  listar_duenos, listar_mascotas, listar_veterinarios, listar_consultorios
+  recorren y llaman mostrar_info.
+
+  listar_turnos_proximos / listar_turnos_pasados filtran por comparación con
+  datetime.now(), ordenan y muestran (no filtran por estado; muestran todos
+  los turnos en esa categoría temporal). Las “consultas tipo reporte” sí filtran
+  solo Activos (ver siguiente apartado).
+
+6.8 Consultas para reportes
+
+  turnos_por_fecha(fecha: date): turnos Activos cuya fecha (sin hora) coincide.
+  turnos_por_veterinario(matricula): filtra por objeto Veterinario y Activo.
+  turnos_por_mascota(nombre, dni_dueno): resuelve mascota; si no existe, la
+    lista queda vacía (no hay excepción en estos métodos de consulta).
+  turnos_por_dueno(dni): todos los Activos cuya mascota pertenece al dueño.
+
+  El menú imprime estos resultados llamando turno.mostrar_info().
+
+
+--------------------------------------------------------------------------------
+7. CAPA DE PERSISTENCIA: PATRÓN DAO Y ARCHIVOS JSON
+--------------------------------------------------------------------------------
+
+7.1 Formato
+
+  Cada archivo es un arreglo JSON de objetos con claves acordes a los atributos
+  persistidos. Se usa indent=4 para legibilidad humana al abrir los archivos.
+
+7.2 ClinicaDAO
+
+  guardar(clinica, base_path):
+    Escribe en orden: duenos.json, mascotas.json, veterinarios.json,
+    consultorios.json, turnos.json.
+
+  cargar(clinica, base_path):
+    Lee en el mismo orden. Este orden es obligatorio: al cargar turnos deben
+    existir ya dueños, mascotas, veterinarios y consultorios para reconstruir
+    referencias por DNI, nombre+mascota, matrícula y número de consultorio.
+
+7.3 Detalle por DAO
+
+  DuenoDAO / VeterinarioDAO / ConsultorioDAO: guardan campos escalares y en
+  carga llaman a registrar_* de la clínica (reutilizan validación de alta).
+
+  MascotaDAO: guarda nombre, especie, edad, raza, dni_dueno; al cargar llama
+  registrar_mascota. Nota de implementación: al serializar usa en un caso
+  m._especie y m._edad (atributos del padre) para no depender de getters que
+  no existen en Animal más allá de get_especie/get_edad (sí existen getters).
+
+  TurnoDAO: cada ítem guarda id, nombre_mascota, dni_dueno, matricula,
+  consultorio (número), fecha en ISO string, estado. Al cargar parsea fecha con
+  datetime.fromisoformat y delega en restaurar_turno. Al final llama
+  Turno.sincronizar_contador_tras_carga(clinica._turnos).
+
+7.4 Robustez al iniciar sin datos
+
+  Los DAO abren archivos con open(path, "r"). Si la carpeta data/ está vacía o
+  falta algún archivo, Python lanza FileNotFoundError. En main.py se captura y
+  se ignora (pass), de modo que la aplicación arranca con listas vacías. Ojo:
+  si existe duenos.json pero falta otro archivo, la carga puede fallar en un
+  paso intermedio; para un TP es aceptable documentar que se recomienda borrar
+  data/ o mantener el juego completo de archivos.
+
+7.5 Acoplamiento práctico DAO–Clinica
+
+  ClinicaDAO.guardar accede a clinica._duenos, etc. En un diseño más “puro” la
+  clínica expondría propiedades o métodos get_* sin guion bajo. Aquí se aceptó
+  acceso directo para reducir código en un trabajo acotado; es una decisión
+  explícita con trade-off de encapsulamiento estricto vs simplicidad.
+
+
+--------------------------------------------------------------------------------
+8. INTERFAZ DE USUARIO: MENU Y PUNTO DE ENTRADA MAIN
+--------------------------------------------------------------------------------
+
+8.1 Menu
+
+  ejecutar(): bucle del menú principal con ramas a submenús por entidad.
+  Cada submenú repite el patrón: opciones numéricas, try/except ValueError para
+  mostrar errores de negocio sin cerrar el programa.
+
+  _pedir_entero: convierte input a int; si falla, ValueError uniforme.
+  _pedir_fecha_hora: strptime "%Y-%m-%d %H:%M".
+  Consulta por fecha usa solo "%Y-%m-%d".
+
+  guardar_automatico: decorador que tras ejecutar el método envuelto llama
+  _guardar(), que a su vez usa ClinicaDAO.guardar(..., "data/"). Así el usuario
+  no tiene que acordarse de guardar tras cada alta/baja/modificación. Las
+  operaciones de solo lectura (listar, consultas) no están decoradas.
+
+8.2 main.py
+
+  Tras el menú, siempre se llama dao.guardar una vez más para persistir el
+  estado final (por si algún flujo no pasó por un método decorado, o por
+  consistencia al salir).
+
+  Excepciones al cargar:
+    FileNotFoundError → ignorar (primera ejecución).
+    json.JSONDecodeError → mensaje (archivo corrupto).
+    ValueError, KeyError → mensaje (datos que no pasan registrar/restaurar).
+
+
+--------------------------------------------------------------------------------
+9. FUNCIONALIDADES PEDIDAS: TRAZABILIDAD CONSIGNA → CÓDIGO
+--------------------------------------------------------------------------------
+
+  Registrar mascotas y dueños
+    Menu → registrar_dueno, registrar_mascota → ClinicaVeterinaria.
+
+  Registrar veterinarios y especialidad
+    registrar_veterinario.
+
+  Agendar, modificar, cancelar turnos
+    agendar_turno, modificar_turno, cancelar_turno (+ restaurar_turno solo para
+    carga desde DAO).
+
+  Consultar reportes por día, mascota, veterinario
+    turnos_por_fecha, turnos_por_mascota, turnos_por_veterinario desde el submenú
+    Consultas. Además se implementó consulta por dueño (turnos de todas sus
+    mascotas), útil en la práctica y alineado con “reportes”.
+
+  Validar fechas y horarios
+    Fecha futura en altas y modificaciones normales; bloques de 15 minutos;
+    solapes por recurso (vet, sala, paciente).
+
+  CRUD menú por entidad
+    Dueños, mascotas, veterinarios, consultorios: alta, listado, modificación,
+    baja con reglas. Turnos: agendar, listar próximos/pasados, modificar fecha,
+    cancelar, consultas.
+
+  Persistencia JSON
+    Carpeta data/, ClinicaDAO + DAO individuales.
+
+  Pruebas
+    test/ con unittest (ejecutables también con pytest).
+
+
+--------------------------------------------------------------------------------
+10. VALIDACIONES, REGLAS DE NEGOCIO Y MANEJO DE ERRORES
+--------------------------------------------------------------------------------
+
+  - DNI argentino modelado como entero entre 10000000 y 99999999 inclusive.
+  - Teléfono: 11 dígitos numéricos (formato fijo pedido en el menú).
+  - Nombres no vacíos y no “solo números” donde se valida así.
+  - Matrícula y especialidad no vacías para veterinario.
+  - Número de consultorio positivo y único.
+  - Turnos: minutos permitidos y segundos en cero; duración 30 minutos;
+    solapes; estado cancelado excluido de conflictos y de reportes activos.
+  - Errores de negocio: ValueError con mensaje en español; el menú los atrapa y
+    los muestra al usuario.
+  - Errores de carga: tratados en main para no abortar sin explicación.
+
+
+--------------------------------------------------------------------------------
+11. PRUEBAS AUTOMATIZADAS
+--------------------------------------------------------------------------------
+
+  El proyecto incluye tests unitarios de modelo (validaciones, turnos,
+  consultas) y de cada DAO, más test_clinica_dao que guarda y recarga una
+  clínica mínima en carpeta test_data/.
+
+  Framework: unittest.TestCase (estilo clásico). El README sugiere ejecutar con
+  pytest por comodidad de descubrimiento de tests; pytest puede ejecutar tests
+  unittest sin cambios.
+
+  Objetivo pedagógico: demostrar comportamiento reproducible y regresiones
+  mínimas al cambiar código.
+
+
+--------------------------------------------------------------------------------
+12. RELACIÓN CON LOS CONCEPTOS DE LA MATERIA (CHEAT SHEET DE POO)
+--------------------------------------------------------------------------------
+
+  Modelo computable y dominio: el código ejecutable modela la clínica y sus
+  reglas; las clases representan conceptos del problema real.
+
+  Clase y objeto: plantillas (Turno, Dueno) vs instancias concretas en listas.
+
+  Encapsulamiento: atributos con _ y acceso vía métodos; reglas en la clínica.
+
+  Herencia: Persona→Dueno/Veterinario, Animal→Mascota; reutilización de código.
+
+  Polimorfismo: mostrar_info distinto según subclase; listados polimórficos.
+
+  Abstracción: ABC impiden instanciar Persona/Animal directamente.
+
+  Excepciones: raise/try/except para flujos de error controlados.
+
+  Patrón DAO: separación persistencia vs negocio.
+
+  Convenciones: PascalCase en clases, snake_case en métodos/variables (PEP 8).
+
+  Temas avanzados de la cheat sheet (Singleton clásico, Iterator propio,
+  generadores con yield, TDD estricto): no son el foco del TP; pueden mencionarse
+  en defensa como “no aplican tal cual” o “solo parcialmente”.
+
+
+--------------------------------------------------------------------------------
+13. CRITERIOS DE EVALUACIÓN DE LA CONSIGNA
+--------------------------------------------------------------------------------
+
+  Cumplimiento funcional: CRUD, turnos, consultas, validaciones, JSON.
+  Diseño UML: diagramas de clases, casos de uso y secuencia (documentación
+    gráfica que acompaña este informe).
+  POO: herencia, encapsulamiento, responsabilidades separadas por capas.
+  Validaciones y errores: mensajes claros, sin caídas silenciosas en el menú.
+  Claridad y estilo: nombres coherentes, comentarios puntuales, estructura de
+    carpetas entendible.
+
+
+--------------------------------------------------------------------------------
+14. LIMITACIONES CONOCIDAS Y POSIBLES EXTENSIONES
+--------------------------------------------------------------------------------
+
+  - Búsquedas lineales en listas; no hay base de datos ni índices.
+  - Algunos inputs del menú (ej. ID de turno en modificar) usan int(input)
+    directo: un texto no numérico podría lanzar excepción no capturada como
+    ValueError de negocio en ese camino concreto (mejora: reutilizar _pedir_entero).
+  - Horarios no contemplan días no laborables ni feriados.
+  - Un solo usuario en consola; sin roles ni autenticación.
+  Extensiones posibles: CSV alternativo, exportar reportes a archivo, búsqueda
+  por rango de fechas, recordatorios, más de un consultorio por veterinario con
+  reglas adicionales.
+
+
+--------------------------------------------------------------------------------
+15. CIERRE
+--------------------------------------------------------------------------------
+
+El sistema implementa de extremo a extremo el enunciado del recuperatorio:
+modelo orientado a objetos con herencia y abstracción, reglas de agenda en una
+clase aplicación, persistencia desacoplada mediante DAO, interfaz por menú y
+pruebas que respaldan el comportamiento. Las decisiones de diseño priorizan
+claridad pedagógica y cumplimiento de requisitos sobre sofisticación
+innecesaria para el alcance secundario.
+
+Fecha de redacción de este informe: 5 de mayo de 2026.
+
+================================================================================
+FIN DEL INFORME DETALLADO
+================================================================================

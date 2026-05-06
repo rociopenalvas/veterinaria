@@ -75,7 +75,7 @@ class ClinicaVeterinaria:
         dueno = Dueno(dni, nombre, telefono, direccion)
         self._duenos.append(dueno)
 
-    def _hay_problema(self, turno: Turno, nueva_fecha=None):
+    def _verificar_superposicion_turno(self, turno: Turno, nueva_fecha=None):
         """
         Verifica si un turno se superpone con otro activo.
         Si nueva_fecha no es None, se usa esa fecha en vez de la original.
@@ -159,7 +159,7 @@ class ClinicaVeterinaria:
 
         turno = Turno(mascota, veterinario, fecha_hora, consultorio)
 
-        self._hay_problema(turno)
+        self._verificar_superposicion_turno(turno)
         self._turnos.append(turno)
 
     def restaurar_turno(
@@ -216,7 +216,7 @@ class ClinicaVeterinaria:
             estado=estado,
             validar_fecha_futura=False,
         )
-        self._hay_problema(turno)
+        self._verificar_superposicion_turno(turno)
         self._turnos.append(turno)
 
     def listar_turnos_proximos(self):
@@ -343,7 +343,7 @@ class ClinicaVeterinaria:
         """Modifica la fecha de un turno existente."""
         turno = self._buscar_turno_por_id(id_turno)
 
-        self._hay_problema(turno, nueva_fecha)
+        self._verificar_superposicion_turno(turno, nueva_fecha)
 
         turno.modificar_fecha(nueva_fecha)
 
