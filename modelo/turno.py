@@ -89,6 +89,7 @@ class Turno:
         self._fecha_hora = nueva_fecha_hora
 
     def mostrar_info(self) -> None:
+        print(f"  ID: {self._id}")
         print(f"  Mascota: {self._mascota.get_nombre()}")
         dueno = self._mascota.get_dueno()
         print(

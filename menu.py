@@ -398,13 +398,14 @@ class Menu:
 
         fecha = self._pedir_fecha_hora()
 
-        self._clinica.agendar_turno(
+        id_turno = self._clinica.agendar_turno(
             nombre,
             dni,
             matricula,
             numero,
             fecha
         )
+        print(f"Turno agendado con éxito. ID: {id_turno}")
 
     def _listar_turnos_proximos(self):
         self._clinica.listar_turnos_proximos()

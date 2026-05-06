@@ -128,7 +128,7 @@ class ClinicaVeterinaria:
         matricula: str,
         numero_consultorio: int,
         fecha_hora,
-    ) -> None:
+    ) -> int:
         if nombre_mascota.strip() == "":
             raise ValueError("Nombre de mascota inválido.")
 
@@ -161,6 +161,7 @@ class ClinicaVeterinaria:
 
         self._verificar_superposicion_turno(turno)
         self._turnos.append(turno)
+        return turno.get_id()
 
     def restaurar_turno(
         self,
