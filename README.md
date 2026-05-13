@@ -17,7 +17,7 @@ py main.py
 ## Como ejecutar tests
 
 ```bash
-py -m pytest test/ -q
+py -m unittest discover -s test -p "test_*.py" -v
 ```
 
 ## Funcionalidades principales

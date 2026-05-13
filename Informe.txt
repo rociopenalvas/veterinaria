@@ -9,20 +9,30 @@ Este documento describe de forma exhaustiva el proceso de desarrollo, las
 decisiones de diseño, la organización del código, el funcionamiento técnico del
 sistema y la forma en que cada requisito de la consigna fue abordado. Está
 redactado para sustentar la defensa oral y para acompañar la entrega de UML e
-implementación.
+implementación. También desarrolla el flujo de información entre capas, un
+recorrido detallado por la capa DAO, una guía práctica de ejecución y un
+apartado de perspectivas y mejoras futuras. Para pasarlo a Google Docs, conviene
+aplicar estilos de título a los bloques con guiones y a los encabezados
+numerados.
 
 
 --------------------------------------------------------------------------------
 ÍNDICE
 --------------------------------------------------------------------------------
+  Introducción: secciones 1 y 2.
+  Desarrollo: secciones 3 a 12 (la 3 incluye subapartados 3.1 a 3.8; la 7 incluye
+    7.1 a 7.6).
+  Ejecución: sección 8 (subapartados 8.1 a 8.3).
+  Conclusión: secciones 13 a 16.
+
   1. Marco del trabajo y consigna
   2. Enfoque de desarrollo (cómo se encaró el proyecto en el tiempo)
-  3. Visión general de la arquitectura y decisiones de diseño
+  3. Visión general de la arquitectura y decisiones de diseño (3.1 a 3.8)
   4. Estructura de carpetas y responsabilidad de cada módulo
   5. Modelo del dominio (clases del paquete modelo/)
   6. Capa de lógica: ClinicaVeterinaria
-  7. Capa de persistencia: patrón DAO y archivos JSON
-  8. Interfaz de usuario: Menu y punto de entrada main
+  7. Capa de persistencia: patrón DAO y archivos JSON (7.1 a 7.6)
+  8. Interfaz de usuario: menú y punto de entrada main (8.1 a 8.3)
   9. Funcionalidades pedidas: trazabilidad consigna → código
  10. Validaciones, reglas de negocio y manejo de errores
  11. Pruebas automatizadas
@@ -30,6 +40,7 @@ implementación.
  13. Criterios de evaluación de la consigna (cómo los cubre el trabajo)
  14. Limitaciones conocidas y posibles extensiones
  15. Cierre
+ 16. Perspectivas de arquitectura y mejoras futuras
 
 
 --------------------------------------------------------------------------------
@@ -196,6 +207,70 @@ enlazados, etc.
   - La condición de solape usa intervalos semiabiertos [inicio, fin): dos turnos
     que uno termina exactamente cuando el otro empieza NO se consideran
     superpuestos (el veterinario puede atender de corrido sin traslape).
+
+
+--------------------------------------------------------------------------------
+3.8 Flujo de información (recorrido completo)
+--------------------------------------------------------------------------------
+
+Este apartado describe “quién le pasa qué a quién” en un solo recorrido, para
+la defensa oral y para quien vaya a leer el código sin perderse.
+
+Flujo en una operación típica de ALTA (por ejemplo registrar un dueño o agendar
+un turno):
+
+  (1) El usuario escribe en la consola. La clase Menu (menu.py) solo traduce lo
+      mínimo indispensable: en muchos casos pide números enteros con
+      _pedir_entero, o fecha y hora con _pedir_fecha_hora usando strptime. El
+      menú no contiene reglas de negocio del tipo “DNI de ocho dígitos” ni
+      “solape de turnos”: delega en ClinicaVeterinaria.
+
+  (2) Menu llama a un método público de clinica.py (por ejemplo registrar_dueno
+      o agendar_turno). En ese momento la información pasa de tipos simples
+      (strings, enteros, datetime) hacia objetos del dominio: se instancian
+      Dueno, Mascota, Turno, etc., y se guardan referencias en las listas
+      internas de la clínica.
+
+  (3) Los objetos del paquete modelo encapsulan datos y un comportamiento
+      acotado. Por ejemplo Turno valida el bloque de minutos permitidos y puede
+      exigir fecha futura cuando corresponde; ClinicaVeterinaria decide cosas
+      que requieren ver muchas entidades a la vez (duplicados, solapes entre
+      turnos, integridad al borrar).
+
+  (4) Si el método del menú estaba decorado con guardar_automatico, al terminar
+      sin excepción se llama a ClinicaDAO.guardar. Ahí la información vuelve a
+      aplanarse: de grafos de objetos en memoria a listas de diccionarios JSON.
+      Cada *DAO escribe un archivo distinto bajo data/.
+
+Flujo al INICIAR la aplicación (main.py):
+
+  (1) Se crea ClinicaVeterinaria y ClinicaDAO. Se intenta dao.cargar(clinica,
+      "data/").
+
+  (2) ClinicaDAO no “inventa” objetos por su cuenta: delega en DuenoDAO.cargar,
+      MascotaDAO.cargar, etc. Cada uno lee un archivo y por cada fila llama de
+      nuevo a la clínica (registrar_dueno, registrar_mascota, …) o en el caso de
+      turnos a restaurar_turno. Así se reutilizan las mismas validaciones que en
+      el uso interactivo, y en memoria se reconstruyen las mismas relaciones por
+      referencia (por ejemplo una Mascota apunta al objeto Dueno ya cargado).
+
+  (3) Punto crítico: JSON no guarda punteros ni objetos anidados profundos en
+      los turnos. En disco solo hay identificadores (DNI, matrícula, número de
+      consultorio, nombre de mascota + DNI del dueño, id de turno, fecha ISO,
+      estado). Por eso el ORDEN de carga fijado en ClinicaDAO es parte del
+      diseño: si se cargaran turnos antes que las mascotas, restaurar_turno no
+      podría encontrar la mascota y fallaría o dejaría datos inconsistentes.
+
+Flujo al SALIR:
+
+  Al terminar Menu.ejecutar(), main vuelve a llamar a dao.guardar. Eso refuerza
+  que el estado en memoria quede reflejado en disco incluso si algún camino no
+  pasó por un método decorado del menú.
+
+En resumen: el menú es una fachada delgada; la clínica es el cerebro de reglas;
+el modelo da forma a los datos; los DAO traducen memoria ↔ archivos. Esa
+separación es la que permite explicar el sistema capa por capa y la que se
+evalúa cuando la consigna pide POO y persistencia desacoplada.
 
 
 --------------------------------------------------------------------------------
@@ -452,7 +527,75 @@ _consultorios, _turnos. Los métodos públicos siguen la idea CRUD donde aplica.
 
 
 --------------------------------------------------------------------------------
-8. INTERFAZ DE USUARIO: MENU Y PUNTO DE ENTRADA MAIN
+7.6 Implementación de los DAO paso a paso
+--------------------------------------------------------------------------------
+
+ClinicaDAO como orquestador
+  La clase ClinicaDAO (dao/clinica_dao.py) no persiste “la clínica” como un solo
+  blob: compone cinco DAO especializados y define el ORDEN fijo de guardado y
+  carga. Ese orden no es cosmético: la carga de turnos.json necesita que ya
+  existan en memoria los dueños, las mascotas, los veterinarios y los
+  consultorios a los que los turnos van a enlazarse por búsqueda.
+
+DuenoDAO, VeterinarioDAO, ConsultorioDAO (patrón simple)
+  En guardar se recorre la lista de objetos y se arma una lista de dicts con
+  solo tipos JSON-serializables (números, strings). En cargar se hace json.load
+  y por cada dict se llama al método registrar_* correspondiente de la clínica.
+  Ventaja pedagógica: cualquier regla de alta (DNI válido, unicidad de matrícula
+  o número de consultorio) se aplica igual al cargar que al usar el menú.
+  Desventaja práctica: si un archivo histórico tiene datos inválidos, la carga
+  aborta con ValueError (luego main lo muestra): no hay modo “importar sucio”.
+
+MascotaDAO (detalle fino de implementación)
+  Al guardar, además de get_nombre(), get_raza() y get_dueno().get_dni(), el
+  código usa m._especie y m._edad. En Python el subrayado es convención de
+  “interno”, no privado real: el DAO accede a atributos heredados de Animal.
+  La intención práctica es serializar campos del padre sin duplicar lógica; en
+  una refactorización futura bastaría usar siempre get_especie()/get_edad() para
+  que el DAO no toque atributos con prefijo _ y el encapsulamiento sea más
+  uniforme.
+
+TurnoDAO (el más delicado, conviene explicarlo en la defensa)
+  Al guardar, cada turno se descompone en campos planos: id, nombre_mascota,
+  dni_dueno, matricula, consultorio (número), fecha como string ISO8601
+  (datetime.isoformat()) y estado. No se serializa el objeto Mascota entero:
+  eso evitaría duplicar dueños dentro de cada turno y mantendría archivos más
+  grandes y difíciles de editar a mano.
+
+  Al cargar, por cada dict se parsea la fecha con datetime.fromisoformat (es
+  el par natural de isoformat en este proyecto) y se llama a
+  clinica.restaurar_turno(...). Ese método es distinto de agendar_turno porque
+  debe aceptar ids ya existentes, estados persistidos (“Activo”/“Cancelado”) y
+  fechas en el pasado en disco; por eso Turno se construye con id_existente,
+  estado y validar_fecha_futura=False.
+
+  Después de cargar todos los turnos, TurnoDAO llama a
+  Turno.sincronizar_contador_tras_carga(clinica._turnos). El contador de clase
+  _contador_id es el que asigna ids nuevos cuando el usuario agenda desde el
+  menú; si al cargar JSON no se actualizara el contador al máximo id existente,
+  el próximo turno nuevo podría repetir un id ya guardado y rompería la
+  identificación usada para modificar o cancelar.
+
+  restaurar_turno además vuelve a ejecutar _verificar_superposicion_turno: si
+  el archivo tuviera dos turnos “Activo” imposibles que comparten veterinario,
+  consultorio o mascota en el mismo horario, la carga falla en lugar de dejar un
+  estado incoherente en memoria.
+
+Detalles de implementación comunes a varios DAO
+  Antes de escribir, varios DAO usan os.makedirs(os.path.dirname(path),
+  exist_ok=True) para crear la carpeta data/ si todavía no existe. Los archivos
+  se escriben con indent=4 para inspección humana.
+
+Acoplamiento clinica._duenos (y listas similares)
+  ClinicaDAO.guardar lee directamente las listas con nombre _duenos, etc. Es un
+  acoplamiento “package friend” típico de trabajos acotados: la persistencia ve
+  el interior de la clínica. Una evolución natural sería exponer métodos tipo
+  obtener_duenos_para_serializar() o copias inmutables, para que los cambios en
+  la representación interna no rompan el DAO.
+
+
+--------------------------------------------------------------------------------
+8. INTERFAZ DE USUARIO: MENÚ Y PUNTO DE ENTRADA MAIN
 --------------------------------------------------------------------------------
 
 8.1 Menu
@@ -480,6 +623,47 @@ _consultorios, _turnos. Los métodos públicos siguen la idea CRUD donde aplica.
     FileNotFoundError → ignorar (primera ejecución).
     json.JSONDecodeError → mensaje (archivo corrupto).
     ValueError, KeyError → mensaje (datos que no pasan registrar/restaurar).
+
+
+--------------------------------------------------------------------------------
+8.3 Guía práctica de ejecución
+--------------------------------------------------------------------------------
+
+Cómo lanzar el programa
+  Desde la carpeta raíz del proyecto (donde está main.py), en una terminal:
+    python main.py
+  En Windows a veces se usa el lanzador:
+    py main.py
+
+Qué ocurre en el primer arranque sin datos
+  Si no existe la carpeta data/ o faltan archivos JSON, main atrapa
+  FileNotFoundError al cargar y continúa con listas vacías: es el comportamiento
+  esperado para “primera vez”. Si en data/ hay solo algunos archivos (por
+  ejemplo quedó duenos.json pero se borró mascotas.json), la carga puede fallar
+  en un paso intermedio; en ese caso lo más seguro es vaciar data/ por completo
+  o restaurar el juego entero de archivos.
+
+Orden recomendado para el usuario (evita mensajes de “no existe”)
+  1) Registrar dueños.
+  2) Registrar mascotas (cada una referencia un DNI de dueño ya existente).
+  3) Registrar veterinarios y consultorios.
+  4) Agendar turnos: nombre de mascota, DNI del dueño, matrícula del veterinario,
+     número de consultorio, fecha y hora en formato YYYY-MM-DD HH:MM con minutos
+     00, 15, 30 o 45 (y segundos en cero), según las reglas del modelo Turno.
+  5) Usar listados, modificación o cancelación por ID, y el submenú de consultas
+     para reportes por fecha, veterinario, mascota o dueño.
+
+Detalle del menú a tener en cuenta
+  La mayoría de entradas numéricas pasan por _pedir_entero, que traduce errores
+  de conversión a un ValueError con mensaje uniforme. En cambio, en modificar o
+  cancelar turno el ID a veces se lee con int(input(...)): si el usuario escribe
+  letras, el error puede ser genérico de conversión; es una asimetría conocida
+  documentada también en la sección 14.
+
+Persistencia durante el uso
+  Tras las operaciones decoradas con guardar_automatico, Menu llama a
+  ClinicaDAO.guardar hacia data/. Al salir con la opción 0 del menú principal,
+  main vuelve a guardar una vez más como red de seguridad.
 
 
 --------------------------------------------------------------------------------
@@ -608,7 +792,6 @@ _consultorios, _turnos. Los métodos públicos siguen la idea CRUD donde aplica.
 --------------------------------------------------------------------------------
 15. CIERRE
 --------------------------------------------------------------------------------
-
 El sistema implementa de extremo a extremo el enunciado del recuperatorio:
 modelo orientado a objetos con herencia y abstracción, reglas de agenda en una
 clase aplicación, persistencia desacoplada mediante DAO, interfaz por menú y
@@ -616,8 +799,67 @@ pruebas que respaldan el comportamiento. Las decisiones de diseño priorizan
 claridad pedagógica y cumplimiento de requisitos sobre sofisticación
 innecesaria para el alcance secundario.
 
-Fecha de redacción de este informe: 5 de mayo de 2026.
+Lo anterior cierra la evaluación del trabajo tal como fue pedido; el apartado
+siguiente amplía la mirada hacia mejoras de arquitectura y de producto, útil en
+defensa oral y en informes donde se pida “líneas de evolución” del sistema.
+
+
+--------------------------------------------------------------------------------
+16. PERSPECTIVAS DE ARQUITECTURA Y MEJORAS FUTURAS
+--------------------------------------------------------------------------------
+
+División de responsabilidades (el principal salto de calidad “de TP a proyecto”)
+  Hoy ClinicaVeterinaria concentra muchas responsabilidades: validaciones,
+  consultas, agenda, integridad al borrar y coordinación conceptual de las
+  listas. Funciona bien para el alcance pedagógico, pero en un sistema real se
+  suele partir en piezas más chicas: por ejemplo un TurnoService solo para
+  solapes y ciclo de vida del turno; un RepositorioDePersonas para altas y
+  búsquedas por DNI; un RepositorioDeTurnos para consultas por fecha. La clínica
+  pasaría a ser una fachada que compone esos servicios. Beneficios: archivos más
+  cortos, tests más focalizados, menos riesgo de que un cambio en mascotas
+  rompa algo de turnos por accidente.
+
+Encapsulamiento “hacia afuera” de la clínica
+  Los DAO acceden a listas internas (_duenos, etc.). Una mejora natural es
+  ofrecer métodos explícitos de lectura para persistencia (o DTOs serializables)
+  de modo que la representación interna pueda cambiar (por ejemplo de listas a
+  diccionarios indexados por DNI) sin tocar ClinicaDAO.
+
+Persistencia y concurrencia
+  JSON plano es simple y cumple la consigna, pero no ofrece transacciones: si el
+  programa se corta a mitad de un guardado multiarchivo, teóricamente podría
+  quedar un estado parcial. Una base SQLite con transacciones o un único archivo
+  de snapshot versionado reduce ese riesgo. Además, una base permite claves
+  foráneas que documentan en el esquema las mismas dependencias que hoy están
+  “en la cabeza” del desarrollador (orden de carga).
+
+Interfaz y experiencia de usuario
+  La consola es ideal para el TP; una evolución sería una interfaz web o de
+  escritorio con calendario visual, validación en cliente y la misma lógica de
+  negocio detrás de una API. También se podría unificar el ingreso de IDs de
+  turno usando siempre _pedir_entero para mensajes homogéneos.
+
+Producto y reglas de negocio más ricas
+  Calendario laboral (feriados, franjas por día), duraciones variables por tipo
+  de consulta, recordatorios por WhatsApp o correo, exportación de reportes a
+  PDF o Excel, búsqueda por rango de fechas, historial clínico por mascota,
+  varios consultorios por veterinario con reglas adicionales.
+
+Calidad de software
+  Más tests de integración “end to end” del menú (con entrada simulada), medición
+  de cobertura y un pipeline CI que ejecute pytest en cada commit ayudan a que
+  el proyecto crezca sin miedo.
+
+Copiar este informe a Google Docs sin perder estructura
+  Pegar el texto plano y luego aplicar “Título 1” al bloque principal con muchos
+  guiones (====), “Título 2” a los bloques con guiones medios (----) y “Título 3”
+  a los encabezados numerados (1., 3.1., 7.2., etc.). Las viñetas se pueden
+  convertir a listas con formato de viñetas en Docs.
+
+
+Fecha de redacción: 5 de mayo de 2026. Actualización de contenido: 12 de mayo de 2026.
 
 ================================================================================
 FIN DEL INFORME DETALLADO
 ================================================================================
+
