@@ -19,7 +19,12 @@ class ClinicaVeterinaria:
         self._duenos = []
 
     def registrar_veterinario(
-        self, dni: int, nombre: str, telefono: str, matricula: str, especialidad: str
+        self,
+        dni: int,
+        nombre: str,
+        telefono: str,
+        matricula: str,
+        especialidad: str,
     ) -> None:
         if dni < 10000000 or dni > 99999999:
             raise ValueError("DNI inválido.")
@@ -38,7 +43,14 @@ class ClinicaVeterinaria:
 
         if self._buscar_veterinario_por_matricula(matricula) is not None:
             raise ValueError("La matricula ya está registrada.")
-        veterinario = Veterinario(dni, nombre, telefono, matricula, especialidad)
+
+        veterinario = Veterinario(
+            dni=dni,
+            nombre=nombre,
+            telefono=telefono,
+            matricula=matricula,
+            especialidad=especialidad,
+        )
         self._veterinarios.append(veterinario)
 
     def registrar_consultorio(self, numero: int, descripcion: str) -> None:
@@ -80,7 +92,7 @@ class ClinicaVeterinaria:
         Verifica si un turno se superpone con otro activo.
         Si nueva_fecha no es None, se usa esa fecha en vez de la original.
         """
-        # Solapamiento de intervalos [inicio, fin); nueva_fecha = al modificar un turno.
+        # Solapamiento [inicio, fin); nueva_fecha al modificar turno.
         inicio_nuevo = nueva_fecha if nueva_fecha else turno.get_fecha_hora()
         fin_nuevo = inicio_nuevo + timedelta(minutes=Turno.DURACION_MINUTOS)
 
@@ -94,9 +106,12 @@ class ClinicaVeterinaria:
             inicio_existente = t.get_fecha_hora()
             fin_existente = t.get_fecha_fin()
 
-            # Dos turnos se superponen si el inicio de uno es antes del fin del otro
+            # Dos se superponen si el inicio de uno es antes del fin del otro
             # y al revés (intervalos [inicio, fin)).
-            se_superpone = inicio_nuevo < fin_existente and inicio_existente < fin_nuevo
+            se_superpone = (
+                inicio_nuevo < fin_existente
+                and inicio_existente < fin_nuevo
+            )
 
             if not se_superpone:
                 continue
@@ -104,12 +119,12 @@ class ClinicaVeterinaria:
             if (
                 t.get_veterinario() == turno.get_veterinario()
             ):
-                raise ValueError("El veterinario ya tiene un turno en ese horario.")
+                raise ValueError("Veterinario ocupado en ese horario.")
 
             if (
                 t.get_consultorio() == turno.get_consultorio()
             ):
-                raise ValueError("El consultorio ya está ocupado en ese horario.")
+                raise ValueError("Consultorio ocupado en ese horario.")
 
             if (
                 t.get_mascota() == turno.get_mascota()
@@ -174,7 +189,7 @@ class ClinicaVeterinaria:
         estado: str,
     ):
         """
-        Reconstruye un turno desde JSON (id y estado obligatorios en el archivo).
+        Reconstruye un turno desde JSON (id y estado obligatorios).
         No exige fecha futura: sirve para cargar datos persistidos.
         """
         if nombre_mascota.strip() == "":
@@ -277,7 +292,7 @@ class ClinicaVeterinaria:
             raise ValueError("El dueño no existe. Debe registrarse primero.")
 
         if self._buscar_mascota(nombre, dni_dueno) is not None:
-            raise ValueError("Ya existe una mascota con ese nombre para ese dueño.")
+            raise ValueError("Nombre de mascota repetido para ese dueño.")
 
         mascota = Mascota(especie, edad, nombre, raza, dueno)
         self._mascotas.append(mascota)
@@ -293,7 +308,10 @@ class ClinicaVeterinaria:
             raise ValueError("La mascota no existe.")
 
         for turno in self._turnos:
-            if turno.get_mascota() == mascota and self._turno_activo_futuro(turno):
+            if (
+                turno.get_mascota() == mascota
+                and self._turno_activo_futuro(turno)
+            ):
                 raise ValueError(
                     "No se puede eliminar la mascota porque tiene "
                     "turnos activos futuros asociados."
@@ -317,20 +335,20 @@ class ClinicaVeterinaria:
             print("------------------")
             mascota.mostrar_info()
 
-    def modificar_mascota(self, nombre: str, dni_dueno: int, nueva_edad: int) -> None:
+    def modificar_mascota(self, nom: str, dni_dueno: int, n_edad: int) -> None:
         dueno = self._buscar_dueno_por_dni(dni_dueno)
         if dueno is None:
             raise ValueError("El dueño no existe.")
 
-        mascota = self._buscar_mascota(nombre, dni_dueno)
+        mascota = self._buscar_mascota(nom, dni_dueno)
 
         if mascota is None:
             raise ValueError("La mascota no existe.")
 
-        if nueva_edad < 0:
+        if n_edad < 0:
             raise ValueError("Edad inválida.")
 
-        mascota.set_edad(nueva_edad)
+        mascota.set_edad(n_edad)
 
     def cancelar_turno(self, id_turno: int) -> None:
         turno = self._buscar_turno_por_id(id_turno)
@@ -350,9 +368,9 @@ class ClinicaVeterinaria:
 
     def turnos_por_veterinario(self, matricula_veterinario: str):
         resultados = []
-        veterinario = self._buscar_veterinario_por_matricula(matricula_veterinario)
+        vet = self._buscar_veterinario_por_matricula(matricula_veterinario)
         for t in self._turnos:
-            if t.get_veterinario() == veterinario and t.get_estado() == "Activo":
+            if t.get_veterinario() == vet and t.get_estado() == "Activo":
                 resultados.append(t)
         return resultados
 
@@ -366,16 +384,16 @@ class ClinicaVeterinaria:
 
     def turnos_por_dueno(self, dni_dueno: int):
         resultados = []
-        dueno = self._buscar_dueno_por_dni(dni_dueno)
+        d = self._buscar_dueno_por_dni(dni_dueno)
         for t in self._turnos:
-            if t.get_mascota().get_dueno() == dueno and t.get_estado() == "Activo":
+            if t.get_mascota().get_dueno() == d and t.get_estado() == "Activo":
                 resultados.append(t)
         return resultados
 
-    def turnos_por_fecha(self, fecha: date):
+    def turnos_por_fecha(self, f: date):
         resultados = []
         for t in self._turnos:
-            if t.get_fecha_hora().date() == fecha and t.get_estado() == "Activo":
+            if t.get_fecha_hora().date() == f and t.get_estado() == "Activo":
                 resultados.append(t)
         return resultados
 
@@ -394,7 +412,7 @@ class ClinicaVeterinaria:
         for mascota in self._mascotas:
             if mascota.get_dueno() == dueno:
                 raise ValueError(
-                    "No se puede eliminar dueño porque tiene mascotas asociadas."
+                    "No se puede eliminar porque tiene mascotas asociadas."
                 )
 
         self._duenos.remove(dueno)
@@ -473,16 +491,16 @@ class ClinicaVeterinaria:
             print("------------------")
             veterinario.mostrar_info()
 
-    def modificar_consultorio(self, numero: int, nueva_descripcion: str) -> None:
+    def modificar_consultorio(self, numero: int, n_descripcion: str) -> None:
         consultorio = self._buscar_consultorio_por_numero(numero)
 
         if consultorio is None:
             raise ValueError("El consultorio no existe.")
 
-        if nueva_descripcion.strip() == "":
+        if n_descripcion.strip() == "":
             raise ValueError("Descripción inválida.")
 
-        consultorio.set_descripcion(nueva_descripcion)
+        consultorio.set_descripcion(n_descripcion)
 
     def _buscar_consultorio_por_numero(self, numero: int) -> Consultorio:
         for consultorio in self._consultorios:

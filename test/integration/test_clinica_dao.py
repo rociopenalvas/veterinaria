@@ -9,7 +9,7 @@ class TestClinicaDAO(unittest.TestCase):
         clinica = ClinicaVeterinaria("Test")
         dao = ClinicaDAO()
 
-        clinica.registrar_dueno(47111111, "Soledad", "01136111111", "Calle")
+        clinica.registrar_dueno(47111111, "Sol", "01136111111", "Calle")
 
         dao.guardar(clinica, "test_data/")
 

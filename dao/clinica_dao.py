@@ -16,9 +16,15 @@ class ClinicaDAO:
 
     def guardar(self, clinica, base_path):
         self.dueno_dao.guardar(clinica._duenos, base_path + "duenos.json")
-        self.mascota_dao.guardar(clinica._mascotas, base_path + "mascotas.json")
-        self.vet_dao.guardar(clinica._veterinarios, base_path + "veterinarios.json")
-        self.cons_dao.guardar(clinica._consultorios, base_path + "consultorios.json")
+        self.mascota_dao.guardar(
+            clinica._mascotas, base_path + "mascotas.json"
+        )
+        self.vet_dao.guardar(
+            clinica._veterinarios, base_path + "veterinarios.json"
+        )
+        self.cons_dao.guardar(
+            clinica._consultorios, base_path + "consultorios.json"
+        )
         self.turno_dao.guardar(clinica._turnos, base_path + "turnos.json")
 
     def cargar(self, clinica, base_path):

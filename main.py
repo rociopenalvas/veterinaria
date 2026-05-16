@@ -18,7 +18,7 @@ def main():
     except json.JSONDecodeError as e:
         print("Error: un archivo en data/ no es JSON válido.", e)
     except (ValueError, KeyError) as e:
-        print("Error al cargar datos (dato repetido, incompleto o turno inválido):", e)
+        print("Error al cargar (repetido, incompleto, turno inválido):", e)
 
     menu = Menu(clinica)
     menu.ejecutar()

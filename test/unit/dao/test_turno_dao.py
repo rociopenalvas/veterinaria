@@ -16,7 +16,9 @@ class TestTurnoDAO(unittest.TestCase):
 
         clinica.registrar_dueno(47111111, "Soledad", "01136111111", "Calle")
         clinica.registrar_mascota("Mambo", "Perro", 5, "Lab", 47111111)
-        clinica.registrar_veterinario(87654321, "Dr", "10987654321", "MAT1", "General")
+        clinica.registrar_veterinario(
+            87654321, "Dr", "10987654321", "MAT1", "General"
+        )
         clinica.registrar_consultorio(1, "C1")
 
         fecha = datetime(2032, 12, 12, 10, 0)

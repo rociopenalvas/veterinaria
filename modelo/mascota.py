@@ -4,7 +4,14 @@ from modelo.dueno import Dueno
 
 class Mascota(Animal):
 
-    def __init__(self, especie: str, edad: int, nombre: str, raza: str, dueno: Dueno):
+    def __init__(
+        self,
+        especie: str,
+        edad: int,
+        nombre: str,
+        raza: str,
+        dueno: Dueno,
+    ):
         super().__init__(especie, edad, raza)
         self._nombre = nombre
         self._dueno = dueno
@@ -23,4 +30,7 @@ class Mascota(Animal):
         print(f"   Especie: {self._especie}")
         print(f"   Edad: {self._edad} años")
         print(f"   Raza: {self._raza}")
-        print(f"  Dueño: {self._dueno.get_nombre()} DNI: {self._dueno.get_dni()}")
+        print(
+            f"  Dueño: {self._dueno.get_nombre()}"
+            f"   DNI: {self._dueno.get_dni()}"
+        )

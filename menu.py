@@ -5,7 +5,7 @@ from dao.clinica_dao import ClinicaDAO
 
 def guardar_automatico(func):
     def wrapper(self, *args, **kwargs):
-        # Persiste después de acciones que modifican datos (decorador en cada método).
+        # Persiste después de acciones que modifican datos (decorador).
         resultado = func(self, *args, **kwargs)
         self._guardar()
         return resultado

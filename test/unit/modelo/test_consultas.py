@@ -8,10 +8,10 @@ class TestConsultas(unittest.TestCase):
     def setUp(self):
         self.clinica = ClinicaVeterinaria("Test")
 
-        self.clinica.registrar_dueno(47111111, "Soledad", "01136111111", "Calle")
+        self.clinica.registrar_dueno(47111111, "Sol", "01136111111", "Calle")
         self.clinica.registrar_dueno(47222222, "Juan", "01122222222", "Otra")
 
-        self.clinica.registrar_mascota("Mambo", "Perro", 5, "Lab", 47111111)
+        self.clinica.registrar_mascota("Mambo", "Perro", 5, "Boxer", 47111111)
         self.clinica.registrar_mascota("Luna", "Gato", 3, "Siames", 47222222)
 
         self.clinica.registrar_veterinario(

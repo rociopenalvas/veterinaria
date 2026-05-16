@@ -7,10 +7,10 @@ class TestMascota(unittest.TestCase):
 
     def setUp(self):
         self.clinica = ClinicaVeterinaria("Test")
-        self.clinica.registrar_dueno(47111111, "Soledad", "01136111111", "Calle")
+        self.clinica.registrar_dueno(47111111, "Sol", "01136111111", "Calle")
 
     def test_registrar_mascota_ok(self):
-        self.clinica.registrar_mascota("Mambo", "Perro", 5, "Labrador", 47111111)
+        self.clinica.registrar_mascota("Mambo", "Perro", 5, "Boxer", 47111111)
 
         self.assertEqual(1, len(self.clinica._mascotas))
         m = self.clinica._mascotas[0]
@@ -18,24 +18,28 @@ class TestMascota(unittest.TestCase):
         self.assertEqual("Mambo", m.get_nombre())
         self.assertEqual("Perro", m._especie)
         self.assertEqual(5, m._edad)
-        self.assertEqual("Labrador", m.get_raza())
+        self.assertEqual("Boxer", m.get_raza())
         self.assertEqual(47111111, m.get_dueno().get_dni())
 
     def test_registrar_mascota_dueno_inexistente(self):
         with self.assertRaises(ValueError):
-            self.clinica.registrar_mascota("Mambo", "Perro", 5, "Labrador", 99999999)
+            self.clinica.registrar_mascota(
+                "Mambo", "Perro", 5, "Boxer", 99999999
+            )
 
     def test_registrar_mascota_nombre_vacio(self):
         with self.assertRaises(ValueError):
-            self.clinica.registrar_mascota("", "Perro", 5, "Labrador", 47111111)
+            self.clinica.registrar_mascota("", "Perro", 5, "Boxer", 47111111)
 
     def test_registrar_mascota_nombre_numerico(self):
         with self.assertRaises(ValueError):
-            self.clinica.registrar_mascota("123", "Perro", 5, "Labrador", 47111111)
+            self.clinica.registrar_mascota(
+                "123", "Perro", 5, "Boxer", 47111111
+            )
 
     def test_registrar_mascota_especie_vacia(self):
         with self.assertRaises(ValueError):
-            self.clinica.registrar_mascota("Mambo", "", 5, "Labrador", 47111111)
+            self.clinica.registrar_mascota("Mambo", "", 5, "Boxer", 47111111)
 
     def test_registrar_mascota_raza_vacia(self):
         with self.assertRaises(ValueError):
@@ -43,20 +47,24 @@ class TestMascota(unittest.TestCase):
 
     def test_registrar_mascota_edad_negativa(self):
         with self.assertRaises(ValueError):
-            self.clinica.registrar_mascota("Mambo", "Perro", -1, "Labrador", 47111111)
+            self.clinica.registrar_mascota(
+                "Mambo", "Perro", -1, "Boxer", 47111111
+            )
 
     def test_registrar_mascota_dni_invalido(self):
         with self.assertRaises(ValueError):
-            self.clinica.registrar_mascota("Mambo", "Perro", 5, "Labrador", 123)
+            self.clinica.registrar_mascota("Mambo", "Perro", 5, "Boxer", 123)
 
     def test_registrar_mascota_duplicada(self):
-        self.clinica.registrar_mascota("Mambo", "Perro", 5, "Labrador", 47111111)
+        self.clinica.registrar_mascota("Mambo", "Perro", 5, "Boxer", 47111111)
 
         with self.assertRaises(ValueError):
-            self.clinica.registrar_mascota("Mambo", "Perro", 5, "Labrador", 47111111)
+            self.clinica.registrar_mascota(
+                "Mambo", "Perro", 5, "Boxer", 47111111
+            )
 
     def test_eliminar_mascota_ok(self):
-        self.clinica.registrar_mascota("Mambo", "Perro", 5, "Labrador", 47111111)
+        self.clinica.registrar_mascota("Mambo", "Perro", 5, "Boxer", 47111111)
 
         self.clinica.eliminar_mascota("Mambo", 47111111)
 
@@ -71,7 +79,7 @@ class TestMascota(unittest.TestCase):
             self.clinica.eliminar_mascota("Mambo", 99999999)
 
     def test_eliminar_mascota_con_turno(self):
-        self.clinica.registrar_mascota("Mambo", "Perro", 5, "Labrador", 47111111)
+        self.clinica.registrar_mascota("Mambo", "Perro", 5, "Boxer", 47111111)
         self.clinica.registrar_veterinario(
             87654321, "Dr", "10987654321", "MAT1", "General"
         )
@@ -84,7 +92,7 @@ class TestMascota(unittest.TestCase):
             self.clinica.eliminar_mascota("Mambo", 47111111)
 
     def test_eliminar_mascota_con_turno_cancelado(self):
-        self.clinica.registrar_mascota("Mambo", "Perro", 5, "Labrador", 47111111)
+        self.clinica.registrar_mascota("Mambo", "Perro", 5, "Boxer", 47111111)
         self.clinica.registrar_veterinario(
             87654321, "Dr", "10987654321", "MAT1", "General"
         )
@@ -99,21 +107,26 @@ class TestMascota(unittest.TestCase):
         self.assertEqual(0, len(self.clinica._mascotas))
 
     def test_eliminar_mascota_con_turno_activo_pasado(self):
-        self.clinica.registrar_mascota("Mambo", "Perro", 5, "Labrador", 47111111)
+        self.clinica.registrar_mascota("Mambo", "Perro", 5, "Boxer", 47111111)
         self.clinica.registrar_veterinario(
             87654321, "Dr", "10987654321", "MAT1", "General"
         )
         self.clinica.registrar_consultorio(1, "Consultorio 1")
 
         self.clinica.restaurar_turno(
-            "Mambo", 47111111, "MAT1", 1, datetime(2025, 5, 10, 10, 0), 50, "Activo"
+            "Mambo",
+            47111111,
+            "MAT1", 1,
+            datetime(2025, 5, 10, 10, 0),
+            50,
+            "Activo"
         )
 
         self.clinica.eliminar_mascota("Mambo", 47111111)
         self.assertEqual(0, len(self.clinica._mascotas))
 
     def test_modificar_mascota_ok(self):
-        self.clinica.registrar_mascota("Mambo", "Perro", 5, "Labrador", 47111111)
+        self.clinica.registrar_mascota("Mambo", "Perro", 5, "Boxer", 47111111)
 
         self.clinica.modificar_mascota("Mambo", 47111111, 10)
 
@@ -129,7 +142,7 @@ class TestMascota(unittest.TestCase):
             self.clinica.modificar_mascota("Mambo", 99999999, 10)
 
     def test_modificar_mascota_edad_invalida(self):
-        self.clinica.registrar_mascota("Mambo", "Perro", 5, "Labrador", 47111111)
+        self.clinica.registrar_mascota("Mambo", "Perro", 5, "Boxer", 47111111)
 
         with self.assertRaises(ValueError):
             self.clinica.modificar_mascota("Mambo", 47111111, -1)

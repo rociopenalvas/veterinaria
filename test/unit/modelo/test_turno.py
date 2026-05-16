@@ -8,8 +8,8 @@ class TestTurno(unittest.TestCase):
     def setUp(self):
         self.clinica = ClinicaVeterinaria("Test")
 
-        self.clinica.registrar_dueno(47111111, "Soledad", "01136111111", "Calle")
-        self.clinica.registrar_mascota("Mambo", "Perro", 5, "Labrador", 47111111)
+        self.clinica.registrar_dueno(47111111, "Sol", "01136111111", "Calle")
+        self.clinica.registrar_mascota("Mambo", "Perro", 5, "Boxer", 47111111)
         self.clinica.registrar_veterinario(
             87654321, "Dr", "10987654321", "MAT1", "General"
         )
@@ -70,7 +70,7 @@ class TestTurno(unittest.TestCase):
 
         self.clinica.agendar_turno("Mambo", 47111111, "MAT1", 1, fecha)
 
-        self.clinica.registrar_mascota("Otro", "Perro", 3, "Lab", 47111111)
+        self.clinica.registrar_mascota("Otro", "Perro", 3, "Boxer", 47111111)
 
         with self.assertRaises(ValueError):
             self.clinica.agendar_turno("Otro", 47111111, "MAT1", 1, fecha)
@@ -200,7 +200,7 @@ class TestTurno(unittest.TestCase):
         t1030 = datetime(2032, 12, 12, 10, 30)
         self.clinica.agendar_turno("Mambo", 47111111, "MAT1", 1, t1030)
 
-        # 11:00 arranca al terminar 10:30: no hay solape (cambian vet, mascota, etc.).
+        # 10:30 termina, arranca 11:00, no hay problema.
         t1100 = datetime(2032, 12, 12, 11, 0)
         self.clinica.agendar_turno("Luna", 47222222, "MAT2", 1, t1100)
 

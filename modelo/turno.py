@@ -47,7 +47,7 @@ class Turno:
             or fecha_hora.minute == 30
             or fecha_hora.minute == 45
         ) or fecha_hora.second != 0:
-            raise ValueError("El turno debe comenzar en minuto 00, 15, 30 o 45.")
+            raise ValueError("El turno debe comenzar en min 00, 15, 30 o 45")
 
     @classmethod
     def sincronizar_contador_tras_carga(cls, turnos: list) -> None:
@@ -81,7 +81,7 @@ class Turno:
 
     def modificar_fecha(self, nueva_fecha_hora: datetime):
         """
-        Modifica la fecha y hora, verificando que sea futura y que sea un bloque válido.
+        Modifica fecha_hora, debe ser fecha futura y bloque válido.
         """
         if nueva_fecha_hora <= datetime.now():
             raise ValueError("La nueva fecha debe ser futura.")
